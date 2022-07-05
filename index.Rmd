@@ -1,6 +1,6 @@
 ---
 title: "Lab journal"
-author: "by: Rob Franken"
+author: "by: Dávid Sümeghy"
 
 
  
