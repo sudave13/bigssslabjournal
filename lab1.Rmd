@@ -1,7 +1,7 @@
 ---
 title: "Journal 1"
 #bibliography: references.bib
-author: "Dávid Sümeghy"
+author: "Rob Franken"
 output: 
   html_document:
     css: tweaks.css
@@ -39,61 +39,9 @@ Last compiled on `r format(Sys.time(), '%B, %Y')`
 
 ----
   
-B. For this BIGSSS we will use election results (at the polling station-level) to tap into the degree of polarization. What kind of polarization are we measuring and trying to explain?
-
-The project will focus on measuring political polarization. Political polarization will be analysed in terms of the position of Dutch parties along certain values that define social fault lines. The relative strength of political parties is determined by their performance (votes received) in each constituency. At the end of the project, when the model will be tested, it will also be possible to measure social polarization on the basis of survey data. Depending on the data available, political polarization can be analysed over a given year or even over a number of years.
-
-How would you determine the position of parties on specific political topics with data that is readily available? And, which topic(s) would you use to determine the level of political polarization (in the NL)?
-
-There are several sources for determining the position of parties. The most ideal is the Chapel Hill Survey, because of its reputation and history, and it also offers the possibility of international comparisons, which Voter Compass, for example, does not. Positioning by party politicians is an option, but I do not think this is always valid, based on Swedish experience. It can be somewhat corrected if all parties are placed on the scale by all the parties (as is done in Swedish TV election shows) and somehow averaged, but this can also contain bias. You can also use the Manifesto Project database, or possibly The Populist (but this gives parties only a weight of 0 or 1).
-
-Questionnaire surveys would be used to identify important topics. One of these options is the Standard Eurobarometer 96 winter 2021-2022, which would identify the most relevant issues that the respondent believes the country is facing. In the Netherlands the top 3 topics are Housing, Environment and climate change and Rising prices/ inflation/ cost of living. Although the project focuses on national parliamentary elections, in the case of European Parliament elections, the Special eurobarometer of the european parliament spring 2022 could be used, which includes the issues that the respondent would like to see addressed in priority in the European Parliament. Surely there are similar surveys in the Netherlands that can confirm these important issues on a larger sample. We can also select major problems with media analysis (frequency of appearance in newspapers, TV news) or by examining the text of parliamentary debates.
-
-Which theoretical article on political polarization should we definitely all read for this summer school? Please provide a reference and motivate your answer.
-
-I would recommend for consideration Jose Montalvo and Maria Reynal-Querol's The Effect of Ethnic and Religious
-Conflict on Growth (2001). This is a downgraded version of the Esteban-Ray index in that it uses only a discrete metric instead of distance. This index may be useful in cases where two groups of nearly equal size characterize a society, as this is when the risk of conflict is the highest. This index is particularly useful in the countries mentioned in McCoy and colleagues' (2018) study. In these countries, two strong political groups (sometimes a single party vs a single party, sometimes a governing party vs a united opposition) face each other, and voters view voters of the other group with great dislike and hatred. Although this index does not include the positional differences between the parties, in such societies they may not have been a priori. These societies are divided along the political fault line into two antagonistic groups and the position of the parties along the lines that do not determine the formation of the fault line hardly matters. Virtually no matter the party position, when voters are inherently bipolar, they will vote for their own camp even if they prefer to agree with the other camp on some issues.
-Consideration may also be given to the use of the peripheral heterogeneity index (Desmet et al. 2005). This index is a kind of transition between measuring diversity (fragmentation) and polarization (Desmet et al., 2009). This index calculates by looking at the proportion of the central group (say, the governing party) and each of the peripheral groups, and multiplying this by a difference (say, the position on the environmental issue scale). It does not take into account any difference between each of the peripheral groups. This would allow us to examine how polarized on certain issues the governing party is vs other parties in a given unit. However, this index shows a strong correlation with the Esteban-Ray index in Németh's (2019, sorry it is in Hungarian) paper (p=0.972) when tested on a specific sample, so it could really only give new meaning in very specific cases.
-
-
-Desmet, Klaus, Ignacio Ortuño-Ortín, and Shlomo Weber (2005). “Peripheral Diversity and Redistribution.” CEPR Discussion Paper No. 5112.
-
-Desmet, K., Weber, S., & Ortuño-Ortín, I. (2009). Linguistic diversity and redistribution. Journal of the European Economic Association, 7(6), 1291-1318.
-
-
-Németh, Á. (2019). A diverzitási indexek alaptípusai és alkalmazási lehetőségei az etnicitáskutatásban= Diversity indices and their potential application in ethnic studies. Tér és Társadalom, 33(2), 130-148.
-
-
-Please summarize some of the key or defining features of (a measure of) polarization
-
-The study of polarization is particularly important, as this phenomenon can be linked to the problems of social disorder, tension and unrest that threaten societies. Esteban and Ray argue that the clustering of certain characteristics is more likely to trigger conflict than simple inequalities, and therefore argue for the measurement of polarization. Their polarization index takes into account not only the size of each group but also the distances between them. The authors have identified three characteristics that the population under study should exhibit: a high degree of homogeneity within each group, a high degree of heterogeneity between groups, and a few large groups. The polarization index is global in nature, so if there is a change in the proportion of two groups from the initial state, then groups that were not involved in this change will also affect the value of the index.
-During the project, attention should be paid to population normalization, as this is the only way to compare two geographical units. The use of weighted identification can also be useful, for example, if after an election result society appears polarized, one group may have a weak identification and after a possible electoral defeat it may stop being involved in politics. The strength of party identification can also be taken into account if two countries have the same polarization value, but in one of them the identification with the party's values is stronger, there is a greater chance of conflict.
-
-
-Reynal-Querol & Montalvo polarization index
-Montalvo, J. G., & Reynal-Querol, M. (2005). Ethnic polarization, potential conflict, and civil wars. American economic review, 95(3), 796-816.
-```{r}
-fMRQ <- function(votes) {
-shares <- votes/sum(votes, na.rm = TRUE)
-sharesi<-1-shares
-MRQ<-4*sum(shares^2*sharesi)
-return(MRQ)
-}
-
-
-votes1 <- c(100, 100, 100, 100, 100, 100)
-votes2 <- c(100, 0, 100, 0, 0, 0)
-votes3 <- c(0, 0, 100, 0, 0, 100)
-votes4 <- c(0, 0, 100, 100, 0, 100)
-votes5 <- c(0, 0, 0, 0, 0, 100)
-
-fMRQ(votes=votes1)
-fMRQ(votes=votes2)
-fMRQ(votes=votes3)
-fMRQ(votes=votes4)
-fMRQ(votes=votes5)
-```
-
+This is just an example page of your lab journal.
+You can journal the assignments of the first day here.
+  
 
 ----
 
