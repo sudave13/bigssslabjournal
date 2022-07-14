@@ -1,6 +1,6 @@
 name: "Example repo"
 author: 
-  - 'Rob Franken'
+  - 'Dávid Sümeghy'
 output_dir: "docs"
 exclude: 
   - "data"
@@ -18,13 +18,20 @@ navbar:
         href: lab2.html
       - text: "Day 3"
         href: lab3.html
+      - text: "Day 5"
+        href: lab5.html
+      - text: "Day 6"
+        href: lab6.html
+      - text: "Final presentation"
+        href: assignment.html
+        
         
         # here, other .Rmds can be added
 
 
   right:
   - icon: fab fa-github
-    href: https://github.com/robfranken/bigssslabjournal
+    href: https://github.com/sudave13/bigssslabjournal
 output:
   html_document:
     theme: flatly

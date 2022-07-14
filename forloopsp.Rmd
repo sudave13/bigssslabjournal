@@ -1,0 +1,16 @@
+#for loop SP
+dist_m<-(as.matrix(dist(cbind(x, y)),diag=T, upper=T)) # distance matrix
+
+
+pmm <-size <- rep(NA,length(unique(group))) # in this object i am saving the mean distance
+
+
+for(i in 1:length(unique(group))){  # loop for each unique group
+ subs <- group==unique(group)[i] # define substracts as the unique groups
+pmm[i]<-mean(dist_m[subs,subs]) # calculate mean distance between the members of the same group
+size[i]<-sum(subs) # calculate group sizes
+}
+
+
+pi_m_t_p_mm<-sum(pmm*size)/sum(size)   #calculate pi_m * p_mm
+SP<-pi_m_t_p_mm/mean(dist_m)

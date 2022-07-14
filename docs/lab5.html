@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>lab5.knit</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="tweaks.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    My journal
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Day 1</a>
+    </li>
+    <li>
+      <a href="lab2.html">Day 2</a>
+    </li>
+    <li>
+      <a href="lab3.html">Day 3</a>
+    </li>
+    <li>
+      <a href="lab5.html">Day 5</a>
+    </li>
+    <li>
+      <a href="lab6.html">Day 6</a>
+    </li>
+    <li>
+      <a href="assignment.html">Final presentation</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/sudave13/bigssslabjournal">
+    <span class="fab fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+
+</div>
+
+
+<hr />
+<p>title: “Journal 1” #bibliography: references.bib author: “Dávid Sümeghy” output: html_document: css: tweaks.css toc: true toc_float: true number_sections: false</p>
+<hr />
+<p>Assignment</p>
+<p>For this BIGSSS we will use GIS data from Statistics Netherlands, at the municipality, district (‘wijk’), (‘buurt’) and 100-by-100 meter grid level. What are the basic requirements of data necessary and sufficient to determine the level of spatial segregation in specific areas of the Netherlands? Make a list of requirements for non-spatial and spatial measures.</p>
+<p>Non-overlapping boundaries,data about groups with common characteristic (ethnicity, religion,income..), spatial location of group members, population density,measurable distances between group members, data to analyze the relative location of a group in a city (for centrality and polycentrality measurements).</p>
+<p>How would you theoretically want to define the spatial distance between voters/citizens in the Netherlands? I would like to define the spatial distances with a distance matrix that takes into account geographical distances and assigns more weight to nearby units (distance decay function). As the crow flies distances, travel distances would be better it takes into account boundaries</p>
+<p>Please formulate a precise definition of what you consider to be the relevant neighbourhood (or phrased otherwise ‘local environment’ or ‘social environment’) as input for the segregation measures. The physical space that an individual uses on a daily basis, because this is the space where there is a chance of exposure or contact with another group. For this reason I would suggest to analyze daily commuting distances, but this can only be known through individual questioning. The problem in defining the local environment may be the existence of nearly impassable boundaries (rivers, busy roads) that separate areas close to each other.</p>
+<p>Which theoretical article on residential segregation should we definitely all read for this summer school? Please provide a reference and motivate your answer.</p>
+<p>I would recommend the study by Cory McCartan and colleagues (2021), which does not deal with the measurement of segregation itself, but mainly with the definition of the local environment. Based on a questionnaire survey, the authors find that individuals are more likely to identify areas inhabited by people belonging to the same ethnic group and supporting the same party as their own neighbourhood. This means that the local environment is not delimited by a single distance radius, but may extend into spaces that contain similar individuals, but a bit further away. This concept of local environment for individuals already provides scope for segregation and political polarization.</p>
+<p>McCartan, C., Brown, J. R., &amp; Imai, K. (2021). Measuring and Modeling Neighborhoods. arXiv preprint arXiv:2110.14014</p>
+<p>See the dataframe popcounts and the weight matrix weights below. popcounts contains the population density for two groups at 10 locations. The weights matrix contains the proximity of these points, see (3.1). Based on these ingredients, construct the local environment of each location. That is, the spatial proportions (3.3)) with respect to these two groups at each location.</p>
+<pre class="r"><code>set.seed(567732)
+g1 &lt;- sample(20:400, 10)  #counts group 1
+g2 &lt;- sample(20:400, 10)  #counts group 2
+popcounts &lt;- data.frame(g1, g2)
+distances &lt;- matrix(sample(20:400, 100), nrow = 10, ncol = 10)
+distances[lower.tri(distances)] &lt;- (t(distances)[lower.tri(distances)])
+weights &lt;- exp(-distances/100)
+diag(weights) &lt;- 0
+rm(list = c(&quot;g1&quot;, &quot;g2&quot;, &quot;distances&quot;))
+weights</code></pre>
+<pre><code>##             [,1]       [,2]       [,3]      [,4]       [,5]       [,6]       [,7]       [,8]
+##  [1,] 0.00000000 0.02678268 0.69073433 0.1394569 0.48675226 0.04328280 0.04415717 0.73344696
+##  [2,] 0.02678268 0.00000000 0.18637398 0.4317105 0.24171402 0.02085837 0.18086579 0.06457035
+##  [3,] 0.69073433 0.18637398 0.00000000 0.2345703 0.45384480 0.03688317 0.16696017 0.39851904
+##  [4,] 0.13945686 0.43171052 0.23457029 0.0000000 0.11191675 0.25924026 0.14808039 0.58274825
+##  [5,] 0.48675226 0.24171402 0.45384480 0.1119167 0.00000000 0.06788094 0.08045961 0.62500227
+##  [6,] 0.04328280 0.02085837 0.03688317 0.2592403 0.06788094 0.00000000 0.79453360 0.04460096
+##  [7,] 0.04415717 0.18086579 0.16696017 0.1480804 0.08045961 0.79453360 0.00000000 0.04831564
+##  [8,] 0.73344696 0.06457035 0.39851904 0.5827483 0.62500227 0.04460096 0.04831564 0.00000000
+##  [9,] 0.02044535 0.06329177 0.02282269 0.1422741 0.17552040 0.71892373 0.39062784 0.02024191
+## [10,] 0.07207846 0.03238694 0.01868564 0.4274149 0.33959553 0.02497200 0.76337949 0.67705687
+##             [,9]      [,10]
+##  [1,] 0.02044535 0.07207846
+##  [2,] 0.06329177 0.03238694
+##  [3,] 0.02282269 0.01868564
+##  [4,] 0.14227407 0.42741493
+##  [5,] 0.17552040 0.33959553
+##  [6,] 0.71892373 0.02497200
+##  [7,] 0.39062784 0.76337949
+##  [8,] 0.02024191 0.67705687
+##  [9,] 0.00000000 0.28083162
+## [10,] 0.28083162 0.00000000</code></pre>
+<p>local&lt;-weights%*%as.matrix(popcounts) # matrix algebra</p>
+<p>Exposure/Isolation index P∗</p>
+<p><span class="math display">\[P*=\frac{\tau^{m}*\frac{\sum_{i}\tau_{i}^m*\tilde{\pi}_{i}^n}{\sum_{i}*\tau_{i}^m}+\tau^{n}*\frac{\sum_{i}\tau_{i}^n*\tilde{\pi}_{i}^m}{\sum_{i}\tau_{i}^n}}{\tau^{m}+\tau^{n}}\]</span> Clean-up</p>
+<pre class="r"><code>rm(list = ls())</code></pre>
+<p>General custom functions</p>
+<pre class="r"><code>fsave &lt;- function(x, file, location = &quot;./data/processed/&quot;, ...) {
+    if (!dir.exists(location))
+        dir.create(location)
+    datename &lt;- substr(gsub(&quot;[:-]&quot;, &quot;&quot;, Sys.time()), 1, 8)
+    totalname &lt;- paste(location, datename, file, sep = &quot;&quot;)
+    print(paste(&quot;SAVED: &quot;, totalname, sep = &quot;&quot;))
+    save(x, file = totalname)
+}
+
+fpackage.check &lt;- function(packages) {
+    lapply(packages, FUN = function(x) {
+        if (!require(x, character.only = TRUE)) {
+            install.packages(x, dependencies = TRUE)
+            library(x, character.only = TRUE)
+        }
+    })
+}
+
+colorize &lt;- function(x, color) {
+    sprintf(&quot;&lt;span style=&#39;color: %s;&#39;&gt;%s&lt;/span&gt;&quot;, color, x)
+}</code></pre>
+<p>Load necessary packages</p>
+<pre class="r"><code>packages = c(&quot;tidyverse&quot;, &quot;rgl&quot;, &quot;spdep&quot;, &quot;geosphere&quot;, &quot;truncnorm&quot;, &quot;progress&quot;, &quot;foreach&quot;, &quot;doParallel&quot;,
+    &quot;ape&quot;, &quot;seg&quot;, &quot;rgl&quot;, &quot;OasisR&quot;, &quot;compiler&quot;)
+
+fpackage.check(packages)</code></pre>
+<pre><code>## Loading required package: rgl</code></pre>
+<pre><code>## Warning: package &#39;rgl&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## Loading required package: spdep</code></pre>
+<pre><code>## Warning: package &#39;spdep&#39; was built under R version 4.1.2</code></pre>
+<pre><code>## Loading required package: spData</code></pre>
+<pre><code>## Warning: package &#39;spData&#39; was built under R version 4.1.2</code></pre>
+<pre><code>## To access larger datasets in this package, install the spDataLarge package with:
+## `install.packages(&#39;spDataLarge&#39;, repos=&#39;https://nowosad.github.io/drat/&#39;, type=&#39;source&#39;)`</code></pre>
+<pre><code>## Loading required package: geosphere</code></pre>
+<pre><code>## Warning: package &#39;geosphere&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## Loading required package: truncnorm</code></pre>
+<pre><code>## Warning: package &#39;truncnorm&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## Loading required package: progress</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Warning: package &#39;foreach&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;foreach&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     accumulate, when</code></pre>
+<pre><code>## Loading required package: doParallel</code></pre>
+<pre><code>## Warning: package &#39;doParallel&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## Loading required package: iterators</code></pre>
+<pre><code>## Warning: package &#39;iterators&#39; was built under R version 4.1.2</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loading required package: ape</code></pre>
+<pre><code>## Warning: package &#39;ape&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;ape&#39;:
+##   method   from 
+##   plot.mst spdep</code></pre>
+<pre><code>## 
+## Attaching package: &#39;ape&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:Hmisc&#39;:
+## 
+##     zoom</code></pre>
+<pre><code>## Loading required package: OasisR</code></pre>
+<pre><code>## Warning: package &#39;OasisR&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;OasisR&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:geosphere&#39;:
+## 
+##     perimeter</code></pre>
+<pre><code>## [[1]]
+## NULL
+## 
+## [[2]]
+## NULL
+## 
+## [[3]]
+## NULL
+## 
+## [[4]]
+## NULL
+## 
+## [[5]]
+## NULL
+## 
+## [[6]]
+## NULL
+## 
+## [[7]]
+## NULL
+## 
+## [[8]]
+## NULL
+## 
+## [[9]]
+## NULL
+## 
+## [[10]]
+## NULL
+## 
+## [[11]]
+## NULL
+## 
+## [[12]]
+## NULL
+## 
+## [[13]]
+## NULL</code></pre>
+<p>Moran’s I function</p>
+<pre class="r"><code># let us define a Moran&#39;s I function (heavily based on Moran.I of package ape) you can toggle
+# rowstandardization
+fMoranI &lt;- function(x, y = NULL, weight, scaled = FALSE, na.rm = FALSE, alternative = &quot;two.sided&quot;, rowstandardize = TRUE) {
+    if (is.null(y)) {
+        y &lt;- x
+    }
+
+    if (dim(weight)[1] != dim(weight)[2])
+        stop(&quot;&#39;weight&#39; must be a square matrix&quot;)
+    nx &lt;- length(x)
+    ny &lt;- length(y)
+    if (dim(weight)[1] != nx | dim(weight)[1] != ny)
+        stop(&quot;&#39;weight&#39; must have as many rows as observations in &#39;x&#39; (and &#39;y&#39;, for the bivariate case) &quot;)
+    ei &lt;- -1/(nx - 1)
+    nas &lt;- is.na(x) | is.na(y)
+    if (any(nas)) {
+        if (na.rm) {
+            x &lt;- x[!nas]
+            y &lt;- y[!nas]
+            nx &lt;- length(x)
+            weight &lt;- weight[!nas, !nas]
+        } else {
+            warning(&quot;&#39;x&#39; and/or &#39;y&#39; have missing values: maybe you wanted to set na.rm = TRUE?&quot;)
+            return(list(observed = NA, expected = ei, sd = NA, p.value = NA))
+        }
+    }
+    if (rowstandardize) {
+        ROWSUM &lt;- rowSums(weight)
+        ROWSUM[ROWSUM == 0] &lt;- 1
+        weight &lt;- weight/ROWSUM
+    }
+    s &lt;- sum(weight)
+    mx &lt;- mean(x)
+    sx &lt;- x - mx
+    my &lt;- mean(y)
+    sy &lt;- y - my
+    v &lt;- sum(sx^2)
+    cv &lt;- sum(weight * sx %o% sy)
+    obs &lt;- (nx/s) * (cv/v)
+    cv_loc &lt;- rowSums(weight * sx %o% sy)
+    obs_loc &lt;- (nx/s) * (cv_loc/v)
+    if (scaled) {
+        i.max &lt;- (nx/s) * (sd(rowSums(weight) * sx)/sqrt(v/(nx - 1)))
+        obs &lt;- obs/i.max
+        obs_loc &lt;- obs_loc/i.max
+    }
+    S1 &lt;- 0.5 * sum((weight + t(weight))^2)
+    S2 &lt;- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
+    s.sq &lt;- s^2
+    k &lt;- (sum(sx^4)/nx)/(v/nx)^2
+    sdi &lt;- sqrt((nx * ((nx^2 - 3 * nx + 3) * S1 - nx * S2 + 3 * s.sq) - k * (nx * (nx - 1) * S1 - 2 *
+        nx * S2 + 6 * s.sq))/((nx - 1) * (nx - 2) * (nx - 3) * s.sq) - 1/((nx - 1)^2))
+    alternative &lt;- match.arg(alternative, c(&quot;two.sided&quot;, &quot;less&quot;, &quot;greater&quot;))
+    pv &lt;- pnorm(obs, mean = ei, sd = sdi)
+    if (alternative == &quot;two.sided&quot;)
+        pv &lt;- if (obs &lt;= ei)
+            2 * pv else 2 * (1 - pv)
+    if (alternative == &quot;greater&quot;)
+        pv &lt;- 1 - pv
+    list(observed = obs, expected = ei, sd = sdi, p.value = pv, observed_locals = obs_loc)
+
+
+}
+fMoranI &lt;- cmpfun(fMoranI)</code></pre>
+<p>Density corrected Moran’s I function</p>
+<pre class="r"><code># Density corrected Moran&#39;s I.
+fMoranIdens &lt;- function(x, y = NULL, proxmat, dens = NULL, N = length(x)) {
+    # Adapted from Anselin (1995, eq. 7, 10, 11)
+    # https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1538-4632.1995.tb00338.x dens: the
+    # proportion of individuals in each cell over the district population if individual level data
+    # dens is.null and N is simply length of input if we have aggregate data then N should be total
+    # population size (or actually just a large number)
+    if (is.null(y)) {
+        y &lt;- x
+    }
+    if (is.null(dens)) {
+        dens &lt;- rep(1/N, times = N)
+    }
+
+    # correct scaling of opinions for densities #this is really inefficient, should use weighted
+    # var from hmsci
+    v1dens_ind &lt;- rep(x, times = (dens * N))
+    v1dens &lt;- (x - mean(v1dens_ind))/sd(v1dens_ind)
+    v2dens_ind &lt;- rep(y, times = (dens * N))
+    v2dens &lt;- (y - mean(v2dens_ind))/sd(v2dens_ind)
+
+    # (density) weighted proximity matrix
+    w &lt;- proxmat
+    wdens &lt;- t(dens * t(w))
+    wdens &lt;- wdens/rowSums(wdens)
+
+    # density and proximity weighted locals
+    localI &lt;- (v1dens * wdens %*% v2dens)  #formula 7
+
+    # correct the normalization constants
+    m2 &lt;- sum(v1dens^2 * dens)
+    S0 &lt;- N  #we know the weight matrix for the individual level should add up to N
+    ydens &lt;- S0 * m2
+    globalI &lt;- sum(localI * dens * N)/ydens  # formula 10/11
+
+    return(list(globalI = globalI, localI = as.numeric(localI)))
+}
+fMoranIdens &lt;- cmpfun(fMoranIdens)</code></pre>
+<p>Creating virtual segregated worlds to test segregation measurements</p>
+<pre class="r"><code># version 09-06-2007
+
+
+# function define world
+iniworld &lt;- function(N = 2000, cn = 4, h = 1, tc = 0.9, pg = c(0.5, 0.5), distropTN = TRUE, plotworld = TRUE,
+    seed = NULL) {
+    # N= number of agents (even number) cn= number of clusters (even number) h= cluster homogeneity
+    # (0.5-1) tc= thinning constant. .9 means retain 90% pg= proportion of groups; length is number
+    # of groups distropTN= use truncated normal to generate opinions, default = false
+
+    # in paper opinions [0,1], here [-1,1] in paper tc is 1 - tc
+
+    if (is.null(seed))
+        seed &lt;- sample(45667:159876, 1)
+
+    set.seed(seed)
+
+    N_ori &lt;- N
+
+    # functions
+    spher_to_cart &lt;- function(r, theta, phi) {
+        x = r * cos(phi) * sin(theta)
+        y = r * sin(theta) * sin(phi)
+        z = r * cos(theta)
+        coordinatesxyz &lt;- matrix(c(x, y, z), ncol = 3)
+        return(coordinatesxyz)
+    }
+
+    distl &lt;- function(x) {
+        distVincentySphere(x, matlonglat, r = 1)
+    }
+
+    # if tc&lt;1 we need to increase initial N, make sure to keep even number
+    if (tc &lt; 1) {
+        N &lt;- trunc(N/(tc * 10)) * 10
+    }
+
+    # define (random) position of agents on sphere:
+    # http://mathworld.wolfram.com/SpherePointPicking.html
+    r &lt;- 1
+    phi &lt;- 2 * pi * runif(N)
+    theta &lt;- acos(2 * runif(N) - 1)
+    coordinatesxyz &lt;- spher_to_cart(r, theta, phi)
+
+    phi_r &lt;- (360 * phi)/(2 * pi)
+    theta_r &lt;- (180 * theta)/pi
+    lat &lt;- 90 - theta_r
+    long &lt;- ifelse(phi_r &gt;= 0 &amp; phi_r &lt; 180, -phi_r, abs(phi_r - 360))
+
+    matlonglat &lt;- matrix(c(long, lat), ncol = 2)
+
+    # improve: we only need to calculate half
+    matlonglatlist &lt;- lapply(seq_len(nrow(matlonglat)), function(i) matlonglat[i, ])
+
+    distl &lt;- function(x) {
+        distVincentySphere(x, matlonglat, r = 1)
+    }
+
+    matdist &lt;- sapply(matlonglatlist, distl)
+
+    # model segregation: could be improved. check existing packages.
+    parents &lt;- sample(1:N, cn)
+    groups &lt;- rep(NA, N)
+    # fix if cn==1
+    groups[parents] &lt;- sample(c(rep(1, round(cn * pg[1])), rep(-1, cn - round(cn * pg[1]))), cn, replace = FALSE)
+
+    # to whom do children belong
+    clusterchildren &lt;- rep(NA, N)
+
+    for (i in c(1:N)) {
+        if (!(i %in% parents)) {
+            # which parents is closest
+            clusterchildren[i] &lt;- parents[which(matdist[i, parents] == min(matdist[i, parents]))]
+            # give child same initial value as closest parent
+            group &lt;- groups[clusterchildren[i]]
+            # change value child depending of cluster homogeneity
+            groups[i] &lt;- ifelse(group == -1, sample(c(-1, 1), 1, prob = c(h, 1 - h)), sample(c(-1, 1),
+                1, prob = c(1 - h, h)))
+        }
+    }
+
+    # define opinions of agents
+    if (distropTN == TRUE) {
+        opinions &lt;- rtruncnorm(N, a = -1, b = 1, mean = 0, sd = 0.45)
+    }
+    # if(distropTN==FALSE) {opinions &lt;- runif(N, min = -1, max = 1)}
+
+    # for (future) plotting
+    color &lt;- ifelse(groups == 1, &quot;blue&quot;, &quot;red&quot;)
+
+    # thin clusters, make cluster boundaries sharper
+    if (tc &lt; 1) {
+        childIDi &lt;- sampletc &lt;- NA
+        # put in big function
+        for (i in 1:cn) {
+            childIDi &lt;- which(clusterchildren == parents[i])
+            distchildparenti &lt;- matdist[parents[i], childIDi]
+            # samplei &lt;- sample(childIDi, trunc(tc*length(childIDi)),
+            # prob=exp(-distchildparenti)^2)
+            cutoffdistance &lt;- quantile(distchildparenti, tc)
+            samplei &lt;- childIDi[distchildparenti &lt; cutoffdistance]
+            sampletc &lt;- c(sampletc, samplei)
+        }
+        clusterchildren &lt;- sampletc &lt;- sampletc[-1]
+        sampletc &lt;- c(sampletc, parents)
+        N_obs &lt;- length(sampletc)
+    }
+
+    N &lt;- N_ori  #setting back to original input
+
+    if (tc == 1) {
+        sampletc &lt;- NA
+        N_obs &lt;- N_ori
+    }
+
+    if (plotworld &amp; tc == 1) {
+        .check3d()
+        rgl.close()
+        plot3d(coordinatesxyz, col = color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;, zlab = &quot;&quot;,
+            size = 8, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+        rgl.spheres(0, 0, 0, radius = 0.995, color = &quot;grey&quot;)
+    }
+
+    if (tc == 1) {
+        worldlist &lt;- list(seed, coordinatesxyz, color, groups, opinions, matdist, N, cn, h, tc, pg, N_obs,
+            parents, clusterchildren, matlonglat)
+        names(worldlist) &lt;- c(&quot;seed&quot;, &quot;coordinatesxyz&quot;, &quot;color&quot;, &quot;groups&quot;, &quot;opinions&quot;, &quot;matdist&quot;, &quot;N&quot;,
+            &quot;cn&quot;, &quot;h&quot;, &quot;tc&quot;, &quot;pg&quot;, &quot;N_obs&quot;, &quot;parents&quot;, &quot;clusterchildren&quot;, &quot;matlonglat&quot;)
+        return(worldlist)
+    }
+
+    if (plotworld &amp; tc &lt; 1) {
+        .check3d()
+        rgl.close()
+        plot3d(coordinatesxyz[sampletc, ], col = color[sampletc], box = FALSE, axes = FALSE, xlab = &quot;&quot;,
+            ylab = &quot;&quot;, zlab = &quot;&quot;, size = 8, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+        rgl.spheres(0, 0, 0, radius = 0.995, color = &quot;grey&quot;)
+    }
+
+    if (tc &lt; 1) {
+        worldlist &lt;- list(seed, coordinatesxyz[sampletc, ], color[sampletc], groups[sampletc], opinions[sampletc],
+            matdist[sampletc, sampletc], N, cn, h, tc, pg, N_obs, parents, clusterchildren, matlonglat[sampletc,
+                ])
+        names(worldlist) &lt;- c(&quot;seed&quot;, &quot;coordinatesxyz&quot;, &quot;color&quot;, &quot;groups&quot;, &quot;opinions&quot;, &quot;matdist&quot;, &quot;N&quot;,
+            &quot;cn&quot;, &quot;h&quot;, &quot;tc&quot;, &quot;pg&quot;, &quot;N_obs&quot;, &quot;parents&quot;, &quot;clusterchildren&quot;, &quot;matlonglat&quot;)
+        return(worldlist)
+    }
+
+
+}</code></pre>
+<p>Please calculate White’s spatial proximity by hand (that is, via your own R code)</p>
+<pre class="r"><code>pmm &lt;-size &lt;- rep(NA,length(unique(df[ , column]))) # in this object i am saving the mean distance</code></pre>
+<pre class="r"><code>fSP&lt;-function(df,column,distances){   #creating SP function
+for (i in 1:length(unique(df[ ,column]))){  # loop for each unique group
+ subs &lt;- df[ , column]==unique(df[ ,column])[i] # define subtracts as the unique groups
+pmm[i]&lt;-mean(distances[subs,subs]) # calculate mean distance between the members of the same group
+size[i]&lt;-sum(subs) # calculate group sizes
+  }
+pi_m_t_p_mm&lt;-sum(pmm*size)/sum(size)   #calculate pi_m * p_mm
+SP&lt;-pi_m_t_p_mm/mean(distances)
+}</code></pre>
+<p>Demonstrate measures on one world</p>
+<pre class="r"><code># define parameters
+N &lt;- c(100, 200, 400)
+cn &lt;- c(4, 8, 16)
+h &lt;- c(0.6, 0.7, 0.8)
+tc &lt;- c(0.6, 0.7, 0.8)
+pg &lt;- c(0.5, 0.6, 0.7)
+
+# run the loop in parallel
+n.cores &lt;- parallel::detectCores() - 1  #save one core for other work
+# create the cluster
+my.cluster &lt;- parallel::makeCluster(n.cores, type = &quot;PSOCK&quot;)
+# register it to be used by %dopar%
+doParallel::registerDoParallel(cl = my.cluster)
+
+
+# to get the same results
+set.seed(5893743)
+
+# make sure to define the correct folder beforehand
+dataworlds &lt;- foreach(Nsim = N, i = icount()) %:% foreach(cnsim = cn, j = icount()) %:% foreach(hsim = h,
+    k = icount()) %:% foreach(tcsim = tc, l = icount()) %:% foreach(pgsim = pg, m = icount(), .packages = packages,
+    .inorder = TRUE) %dopar% {
+    world &lt;- iniworld(N = Nsim, cn = cnsim, h = hsim, tc = tcsim, pg = pgsim, plotworld = FALSE, seed = NULL)
+    save(world, file = paste(&quot;./data/processed/worlds/worldN&quot;, Nsim, &quot;cn&quot;, cnsim, &quot;h&quot;, hsim, &quot;tc&quot;, tcsim,
+        &quot;pg&quot;, pgsim, &quot;rda&quot;, sep = &quot;&quot;), compress = &quot;bzip2&quot;)
+    # return(test)
+}</code></pre>
+<p>Plotting the world in 3D</p>
+<pre class="r"><code>load(paste(&quot;./data/processed/worlds/worldN&quot;, N[3], &quot;cn&quot;, cn[3], &quot;h&quot;, h[3], &quot;tc&quot;, tc[3], &quot;pg&quot;, pg[2],
+    &quot;rda&quot;, sep = &quot;&quot;))
+str(world)</code></pre>
+<p>Plotting the world as a projectd map</p>
+<pre class="r"><code>plot &lt;- {
+    plot3d(world$coordinatesxyz, col = world$color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;,
+        zlab = &quot;&quot;, size = 4, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+    rgl.spheres(0, 0, 0, radius = 0.99, color = &quot;grey&quot;)
+}</code></pre>
+<p>retrieve data from simulated world</p>
+<pre class="r"><code>test &lt;- world
+# first define data.
+mydf &lt;- as.data.frame(cbind(as.numeric(test$groups == 1), as.numeric(test$groups == -1)))
+# define the coordinates. (note: this are from a sphere)
+mycoordinates &lt;- test$matlonglat
+mydf$Longitude &lt;- test$matlonglat[, 1]
+mydf$Latitude &lt;- test$matlonglat[, 2]
+points = st_as_sf(mydf, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+graticule = st_graticule(lat = seq(-80, 80, 10), lon = seq(-180, 180, 10))
+robinson = &quot;+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&quot;
+projected = st_transform(points, robinson)
+graticule = st_transform(graticule, robinson)
+{
+    plot(projected$geometry, pch = 16, col = test$color, reset = FALSE)
+    plot(graticule$geometry, col = &quot;#00000040&quot;, add = T)
+}</code></pre>
+<p>Setting the slope of the exponential distance decay function</p>
+<pre class="r"><code>geodistances &lt;- world$matdist
+# we set distance to yourself to 0, be aware that in the weight matrix we may or may not want to
+# set weight to yourself as 1.
+diag(geodistances) &lt;- 0
+# retrieve the group membership
+mydf &lt;- as.data.frame(cbind(as.numeric(world$groups == 1), as.numeric(world$groups == -1)))
+# define the coordinates
+mycoordinates &lt;- world$matlonglat</code></pre>
+<pre class="r"><code>s &lt;- 1</code></pre>
+<p>Segregation measures via package seg</p>
+<pre class="r"><code>geodistances &lt;- world$matdist
+diag(geodistances) &lt;- 0
+mygeodistances &lt;- as.dist(geodistances)  #the class of the distance matrix should be dist.              
+
+# explain!
+myenv &lt;- seg::localenv(x = mycoordinates, data = mydf, power = s, useExp = TRUE, scale = FALSE, maxdist = pi,
+    sprel = mygeodistances, tol = .Machine$double.eps)
+
+segs &lt;- spatseg(env = myenv, method = &quot;all&quot;, useC = TRUE, negative.rm = FALSE, tol = .Machine$double.eps)
+print(&quot;spatial dissimilarity&quot;)
+segs@d  #spatial dissimilarity
+print(&quot;spatial relative diversity&quot;)
+segs@r  #spatial relative diversity
+print(&quot;spatial information theory&quot;)
+segs@h  #spatial information theory
+print(&quot;Spatial Isolation group 1&quot;)
+segs@p[1, 1]  #spatial exposure/isolation
+print(&quot;Spatial Exposure group 1 to 2&quot;)
+segs@p[1, 2]
+print(&quot;Spatial Exposure group 2 to 1&quot;)
+segs@p[2, 1]
+print(&quot;Spatial Isolation group 2&quot;)
+segs@p[2, 2]
+
+# spatial proximity
+sp &lt;- isp(x = mycoordinates, data = mydf, nb = geodistances, fun = function(x) {
+    exp(-x * 1)
+})
+print(&quot;Spatial proximity&quot;)
+sp</code></pre>
+<p>SP function test</p>
+<pre class="r"><code>SP_test&lt;-fSP(df=mydf,column=&quot;V1&quot;,distances=geodistances)
+print(&quot;Spatial proximity&quot;)
+SP_test</code></pre>
+<pre class="r"><code>geodistances &lt;- world$matdist
+diag(geodistances) &lt;- Inf
+SP(x = mydf, d = geodistances, fdist = &quot;e&quot;, beta = s)</code></pre>
+<pre class="r"><code># run the loop in parallel
+n.cores &lt;- parallel::detectCores() - 1
+my.cluster &lt;- parallel::makeCluster(n.cores, type = &quot;PSOCK&quot;)
+doParallel::registerDoParallel(cl = my.cluster)
+
+# something goes wrong with N=100 h[5], pg[5] #yes all groups are same color , thus option
+# .errorhandling = remove
+dataworldsN1 &lt;- foreach(Nsim = N, i = icount(), .combine = &quot;rbind&quot;) %:% foreach(cnsim = cn, j = icount(),
+    .combine = &quot;rbind&quot;) %:% foreach(hsim = h, k = icount(), .combine = &quot;rbind&quot;) %:% foreach(tcsim = tc,
+    l = icount(), .combine = &quot;rbind&quot;) %:% foreach(pgsim = pg, m = icount(), .combine = &quot;rbind&quot;) %:% foreach(ssim = s,
+    .packages = packages, n = icount(), .combine = &quot;rbind&quot;, .inorder = FALSE, .errorhandling = &quot;remove&quot;) %dopar%
+    {
+
+        load(paste(&quot;./data/processed/worlds/worldN&quot;, Nsim, &quot;cn&quot;, cnsim, &quot;h&quot;, hsim, &quot;tc&quot;, tcsim, &quot;pg&quot;,
+            pgsim, &quot;rda&quot;, sep = &quot;&quot;))
+
+        geodistances &lt;- world$matdist
+        diag(geodistances) &lt;- 0
+        mydf &lt;- as.data.frame(cbind(as.numeric(world$groups == 1), as.numeric(world$groups == -1)))
+        mycoordinates &lt;- world$matlonglat
+        geodistances &lt;- world$matdist
+        diag(geodistances) &lt;- 0
+        mygeodistances &lt;- as.dist(geodistances)  #the class of the distance matrix should be dist.              
+
+        myenv &lt;- seg::localenv(x = mycoordinates, data = mydf, power = ssim, useExp = TRUE, scale = FALSE,
+            maxdist = pi, sprel = mygeodistances, tol = .Machine$double.eps)
+
+        # PACKAGE SEG
+        segs &lt;- spatseg(env = myenv, method = &quot;all&quot;, useC = TRUE, negative.rm = FALSE, tol = .Machine$double.eps)
+        D &lt;- segs@d
+        R &lt;- segs@r
+        H &lt;- segs@h
+        P_11 &lt;- segs@p[1, 1]
+        P_12 &lt;- segs@p[1, 2]
+        P_21 &lt;- segs@p[2, 1]
+        P_22 &lt;- segs@p[2, 2]
+
+        # Moran&#39;s I
+        weights &lt;- exp(-geodistances * ssim)
+        diag(weights) &lt;- 0  #for Moran we do not want own location. 
+        MI &lt;- fMoranI(world$groups, scaled = FALSE, weight = weights, na.rm = TRUE)$observed
+
+        # mean local exposure to outgroup ###not a segregation measure but useful in ABM###
+        Eo &lt;- mean(c(myenv@env[, 2][myenv@data[, 1] == 1], myenv@env[, 1][myenv@data[, 2] == 1]))
+
+        # whites spatial proximity index
+        SP &lt;- SP(x = mydf, d = geodistances, fdist = &quot;e&quot;, beta = ssim)
+        
+        id &lt;- i * 10000 + j * 1000 + k * 100 + l * 10 + m
+        
+        #exposure index
+        DP&lt;-DPxy(x = mydf, d = geodistances, beta = s)
+
+        
+        # SAVE IN DATAFRAME
+        data.frame(id = id, s = ssim, N = Nsim, cn = cnsim, h = hsim, tc = tcsim, pg = pgsim, seed = world$seed,
+            MI = MI, D = D, R = R, H = H, P_11 = P_11, P_12 = P_12, P_21 = P_21, P_22 = P_22, Eo = Eo,
+            SP = SP,DP = DP, i = i, j = j, k = k, l = l, m = m, n = n)
+
+    }</code></pre>
+<pre class="r"><code>fsave(dataworldsN1, &quot;SegWorlds&quot;)</code></pre>
+<p>#low spatial information theory and high exposure</p>
+<pre class="r"><code>load(&quot;./data/processed/20220712SegWorlds&quot;)
+worlds &lt;- x
+rm(x)
+
+filter(N==400) %&gt;% 
+  filter(P_12&lt;mean(P_12)&amp;H&gt;mean(H)) %&gt;% 
+  arrange(H)-&gt;worldssel
+
+load(paste(&quot;./data/processed/worlds/worldN&quot;, N[3], &quot;cn&quot;, cn[1], &quot;h&quot;, h[2], &quot;tc&quot;, tc[1], &quot;pg&quot;, pg[3],
+    &quot;rda&quot;, sep = &quot;&quot;))
+
+world1 &lt;- world</code></pre>
+<pre class="r"><code>{
+    plot3d(world1$coordinatesxyz, col = world1$color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;,
+        zlab = &quot;&quot;, size = 4, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+    rgl.spheres(0, 0, 0, radius = 0.99, color = &quot;grey&quot;)
+}</code></pre>
+<pre class="r"><code>test &lt;- world1
+# first define data.
+mydf &lt;- as.data.frame(cbind(as.numeric(test$groups == 1), as.numeric(test$groups == -1)))
+# define the coordinates. (note: this are from a sphere)
+mycoordinates &lt;- test$matlonglat
+mydf$Longitude &lt;- test$matlonglat[, 1]
+mydf$Latitude &lt;- test$matlonglat[, 2]
+points = st_as_sf(mydf, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+graticule = st_graticule(lat = seq(-80, 80, 10), lon = seq(-180, 180, 10))
+robinson = &quot;+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&quot;
+projected = st_transform(points, robinson)
+graticule = st_transform(graticule, robinson)
+{
+    plot(projected$geometry, pch = 16, col = test$color, reset = FALSE)
+    plot(graticule$geometry, col = &quot;#00000040&quot;, add = T)
+}</code></pre>
+<p>#high spatial information theory and high exposure</p>
+<pre class="r"><code>load(&quot;./data/processed/20220712SegWorlds&quot;)
+worlds &lt;- x
+rm(x)
+
+filter(N==400) %&gt;% 
+  filter(P_12&gt;mean(P_12)&amp;H&gt;mean(H)) %&gt;% 
+  arrange(H)-&gt;worldssel
+
+load(paste(&quot;./data/processed/worlds/worldN&quot;, N[3], &quot;cn&quot;, cn[1], &quot;h&quot;, h[3], &quot;tc&quot;, tc[1], &quot;pg&quot;, pg[2],
+    &quot;rda&quot;, sep = &quot;&quot;))
+
+world2 &lt;- world</code></pre>
+<pre class="r"><code>{
+    plot3d(world2$coordinatesxyz, col = world2$color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;,
+        zlab = &quot;&quot;, size = 4, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+    rgl.spheres(0, 0, 0, radius = 0.99, color = &quot;grey&quot;)
+}</code></pre>
+<pre class="r"><code>test &lt;- world2
+# first define data.
+mydf &lt;- as.data.frame(cbind(as.numeric(test$groups == 1), as.numeric(test$groups == -1)))
+# define the coordinates. (note: this are from a sphere)
+mycoordinates &lt;- test$matlonglat
+mydf$Longitude &lt;- test$matlonglat[, 1]
+mydf$Latitude &lt;- test$matlonglat[, 2]
+points = st_as_sf(mydf, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+graticule = st_graticule(lat = seq(-80, 80, 10), lon = seq(-180, 180, 10))
+robinson = &quot;+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&quot;
+projected = st_transform(points, robinson)
+graticule = st_transform(graticule, robinson)
+{
+    plot(projected$geometry, pch = 16, col = test$color, reset = FALSE)
+    plot(graticule$geometry, col = &quot;#00000040&quot;, add = T)
+}</code></pre>
+<p>#high spatial information theory and low exposure</p>
+<pre class="r"><code>load(&quot;./data/processed/20220712SegWorlds&quot;)
+worlds &lt;- x
+rm(x)
+
+worlds %&gt;%
+  filter(N==400) %&gt;% 
+  filter(P_12&lt;mean(P_12)&amp;H&gt;mean(H)) %&gt;% 
+  arrange(desc(H))-&gt;worldssel
+
+load(paste(&quot;./data/processed/worlds/worldN&quot;, N[3], &quot;cn&quot;, cn[1], &quot;h&quot;, h[3], &quot;tc&quot;, tc[2], &quot;pg&quot;, pg[1],
+    &quot;rda&quot;, sep = &quot;&quot;))
+
+world3 &lt;- world</code></pre>
+<pre class="r"><code>{
+    plot3d(world3$coordinatesxyz, col = world3$color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;,
+        zlab = &quot;&quot;, size = 4, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+    rgl.spheres(0, 0, 0, radius = 0.99, color = &quot;grey&quot;)
+}</code></pre>
+<pre class="r"><code>test &lt;- world3
+# first define data.
+mydf &lt;- as.data.frame(cbind(as.numeric(test$groups == 1), as.numeric(test$groups == -1)))
+# define the coordinates. (note: this are from a sphere)
+mycoordinates &lt;- test$matlonglat
+mydf$Longitude &lt;- test$matlonglat[, 1]
+mydf$Latitude &lt;- test$matlonglat[, 2]
+points = st_as_sf(mydf, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+graticule = st_graticule(lat = seq(-80, 80, 10), lon = seq(-180, 180, 10))
+robinson = &quot;+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&quot;
+projected = st_transform(points, robinson)
+graticule = st_transform(graticule, robinson)
+{
+    plot(projected$geometry, pch = 16, col = test$color, reset = FALSE)
+    plot(graticule$geometry, col = &quot;#00000040&quot;, add = T)
+}</code></pre>
+<p>#low spatial information theory and low exposure</p>
+<pre class="r"><code>load(&quot;./data/processed/20220712SegWorlds&quot;)
+worlds &lt;- x
+rm(x)
+
+worlds %&gt;%
+  filter(N==400) %&gt;% 
+  filter(P_12&lt;mean(P_12)&amp;H&lt;mean(H)) %&gt;% 
+  arrange(H)-&gt;worldssel
+
+load(paste(&quot;./data/processed/worlds/worldN&quot;, N[3], &quot;cn&quot;, cn[1], &quot;h&quot;, h[2], &quot;tc&quot;, tc[1], &quot;pg&quot;, pg[3],
+    &quot;rda&quot;, sep = &quot;&quot;))
+
+world4 &lt;- world</code></pre>
+<pre class="r"><code>{
+    plot3d(world4$coordinatesxyz, col = world4$color, box = FALSE, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;,
+        zlab = &quot;&quot;, size = 4, xlim = c(-1, 1), ylim = c(-1, 1), zlim = c(-1, 1))
+    rgl.spheres(0, 0, 0, radius = 0.99, color = &quot;grey&quot;)
+}</code></pre>
+<pre class="r"><code>test &lt;- world4
+# first define data.
+mydf &lt;- as.data.frame(cbind(as.numeric(test$groups == 1), as.numeric(test$groups == -1)))
+# define the coordinates. (note: this are from a sphere)
+mycoordinates &lt;- test$matlonglat
+mydf$Longitude &lt;- test$matlonglat[, 1]
+mydf$Latitude &lt;- test$matlonglat[, 2]
+points = st_as_sf(mydf, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+graticule = st_graticule(lat = seq(-80, 80, 10), lon = seq(-180, 180, 10))
+robinson = &quot;+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&quot;
+projected = st_transform(points, robinson)
+graticule = st_transform(graticule, robinson)
+{
+    plot(projected$geometry, pch = 16, col = test$color, reset = FALSE)
+    plot(graticule$geometry, col = &quot;#00000040&quot;, add = T)
+}</code></pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

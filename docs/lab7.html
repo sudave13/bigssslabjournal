@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>day7</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="tweaks.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    My journal
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Day 1</a>
+    </li>
+    <li>
+      <a href="lab2.html">Day 2</a>
+    </li>
+    <li>
+      <a href="lab3.html">Day 3</a>
+    </li>
+    <li>
+      <a href="lab5.html">Day 5</a>
+    </li>
+    <li>
+      <a href="lab6.html">Day 6</a>
+    </li>
+    <li>
+      <a href="assignment.html">Final presentation</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/sudave13/bigssslabjournal">
+    <span class="fab fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">day7</h1>
+
+</div>
+
+
+<pre class="r"><code>rm(list = ls())
+gc()</code></pre>
+<pre><code>##           used  (Mb) gc trigger   (Mb)  max used   (Mb)
+## Ncells 4244625 226.7   14022449  748.9  17528061  936.1
+## Vcells 7157208  54.7  142854846 1089.9 223209557 1703.0</code></pre>
+<pre class="r"><code>fsave &lt;- function(x, file, location = &quot;./data/processed/&quot;, ...) {
+    if (!dir.exists(location))
+        dir.create(location)
+    datename &lt;- substr(gsub(&quot;[:-]&quot;, &quot;&quot;, Sys.time()), 1, 8)
+    totalname &lt;- paste(location, datename, file, sep = &quot;&quot;)
+    print(paste(&quot;SAVED: &quot;, totalname, sep = &quot;&quot;))
+    save(x, file = totalname)
+}
+
+fpackage.check &lt;- function(packages) {
+    lapply(packages, FUN = function(x) {
+        if (!require(x, character.only = TRUE)) {
+            install.packages(x, dependencies = TRUE)
+            library(x, character.only = TRUE)
+        }
+    })
+}
+
+colorize &lt;- function(x, color) {
+    sprintf(&quot;&lt;span style=&#39;color: %s;&#39;&gt;%s&lt;/span&gt;&quot;, color, x)
+}
+
+fMoranI &lt;- function(x, y = NULL, weight, scaled = FALSE, na.rm = FALSE, alternative = &quot;two.sided&quot;, rowstandardize = TRUE) {
+    if (is.null(y)) {
+        y &lt;- x
+    }
+
+    if (dim(weight)[1] != dim(weight)[2])
+        stop(&quot;&#39;weight&#39; must be a square matrix&quot;)
+    nx &lt;- length(x)
+    ny &lt;- length(y)
+    if (dim(weight)[1] != nx | dim(weight)[1] != ny)
+        stop(&quot;&#39;weight&#39; must have as many rows as observations in &#39;x&#39; (and &#39;y&#39;, for the bivariate case) &quot;)
+    ei &lt;- -1/(nx - 1)
+    nas &lt;- is.na(x) | is.na(y)
+    if (any(nas)) {
+        if (na.rm) {
+            x &lt;- x[!nas]
+            y &lt;- y[!nas]
+            nx &lt;- length(x)
+            weight &lt;- weight[!nas, !nas]
+        } else {
+            warning(&quot;&#39;x&#39; and/or &#39;y&#39; have missing values: maybe you wanted to set na.rm = TRUE?&quot;)
+            return(list(observed = NA, expected = ei, sd = NA, p.value = NA))
+        }
+    }
+    if (rowstandardize) {
+        ROWSUM &lt;- rowSums(weight)
+        ROWSUM[ROWSUM == 0] &lt;- 1
+        weight &lt;- weight/ROWSUM
+    }
+    s &lt;- sum(weight)
+    mx &lt;- mean(x)
+    sx &lt;- x - mx
+    my &lt;- mean(y)
+    sy &lt;- y - my
+    v &lt;- sum(sx^2)
+    cv &lt;- sum(weight * sx %o% sy)
+    obs &lt;- (nx/s) * (cv/v)
+    cv_loc &lt;- rowSums(weight * sx %o% sy)
+    obs_loc &lt;- (nx/s) * (cv_loc/v)
+    if (scaled) {
+        i.max &lt;- (nx/s) * (sd(rowSums(weight) * sx)/sqrt(v/(nx - 1)))
+        obs &lt;- obs/i.max
+        obs_loc &lt;- obs_loc/i.max
+    }
+    S1 &lt;- 0.5 * sum((weight + t(weight))^2)
+    S2 &lt;- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
+    s.sq &lt;- s^2
+    k &lt;- (sum(sx^4)/nx)/(v/nx)^2
+    sdi &lt;- sqrt((nx * ((nx^2 - 3 * nx + 3) * S1 - nx * S2 + 3 * s.sq) - k * (nx * (nx - 1) * S1 - 2 *
+        nx * S2 + 6 * s.sq))/((nx - 1) * (nx - 2) * (nx - 3) * s.sq) - 1/((nx - 1)^2))
+    alternative &lt;- match.arg(alternative, c(&quot;two.sided&quot;, &quot;less&quot;, &quot;greater&quot;))
+    pv &lt;- pnorm(obs, mean = ei, sd = sdi)
+    if (alternative == &quot;two.sided&quot;)
+        pv &lt;- if (obs &lt;= ei)
+            2 * pv else 2 * (1 - pv)
+    if (alternative == &quot;greater&quot;)
+        pv &lt;- 1 - pv
+    list(observed = obs, expected = ei, sd = sdi, p.value = pv, observed_locals = obs_loc)
+
+
+}
+fMoranI &lt;- compiler::cmpfun(fMoranI)
+
+# Moran&#39;s I for aggregated
+# data_____________________________________________________________________
+fMoranIdens &lt;- function(x, y = NULL, weight, dens = NULL, N = length(x)) {
+    # Adapted from Anselin (1995, eq. 7, 10, 11)
+    # https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1538-4632.1995.tb00338.x dens: the
+    # proportion of individuals in each cell over the district population if individual level data
+    # dens is.null and N is simply length of input if we have aggregate data then N should be total
+    # population size (or actually just a large number)
+    if (is.null(y)) {
+        y &lt;- x
+    }
+    # N &lt;- length(x)
+    if (is.null(dens)) {
+        dens &lt;- rep(1/N, times = N)
+    }
+
+    # correct scaling of opinions for densities #this is really inefficient, should use weighted
+    # var from hmsci
+    v1dens_ind &lt;- rep(x, times = (dens * N))
+    v1dens &lt;- (x - mean(v1dens_ind))/sd(v1dens_ind)
+    v2dens_ind &lt;- rep(y, times = (dens * N))
+    v2dens &lt;- (y - mean(v2dens_ind))/sd(v2dens_ind)
+
+    # (density) weighted proximity matrix
+    w &lt;- weight
+    wdens &lt;- t(dens * t(w))
+    wdens &lt;- wdens/rowSums(wdens)
+
+    # density and proximity weighted locals
+    localI &lt;- (v1dens * wdens %*% v2dens)  #formula 7
+
+    # correct the normalization constants
+    m2 &lt;- sum(v1dens^2 * dens)
+    S0 &lt;- N  #we know the weight matrix for the individual level should add up to N
+    ydens &lt;- S0 * m2
+    globalI &lt;- sum(localI * dens * N)/ydens  # formula 10/11
+
+    return(list(globalI = globalI, localI = as.numeric(localI)))
+}
+fMoranIdens &lt;- compiler::cmpfun(fMoranIdens)</code></pre>
+<pre class="r"><code>fpackage.check(c(&quot;sf&quot;, &quot;seg&quot;, &quot;leaflet&quot;, &quot;ggplot2&quot;, &quot;ggmap&quot;,&quot;compiler&quot;))</code></pre>
+<pre class="r"><code>load(&quot;./data/processed/20220713raster_vor.RData&quot;)
+rast &lt;- x
+rm(x)
+
+load(&quot;./data/processed/20220712shapes.RData&quot;)
+shapes &lt;- x
+rm(x)
+voronoi &lt;- shapes[[6]]
+
+load(&quot;./data/processed/20220708polling_df&quot;)
+pollstations &lt;- x
+rm(x)
+
+# Ensuring that the class of &#39;pollstations&#39; is &#39;sf&#39; and the CRS is correct:
+pollstations &lt;- sf::st_as_sf(x = as.data.frame(pollstations), crs = sf::st_crs(&quot;+proj=longlat +datum=WGS84&quot;),
+    coords = c(&quot;long&quot;, &quot;lat&quot;))</code></pre>
+<pre class="r"><code>pollstations &lt;- sf::st_intersection(x = pollstations, y = voronoi, sf::sf_use_s2(FALSE))</code></pre>
+<pre class="r"><code>tile = 3000
+
+tilerast &lt;- subset(rast, rast$voronoi == tile)
+station &lt;- subset(pollstations, pollstations$voronoi == tile)
+
+leaflet::leaflet(tilerast) |&gt;
+    leaflet::addTiles() |&gt;
+    leaflet::addProviderTiles(providers$Stamen.Toner) |&gt;
+    leaflet::addPolygons(data = voronoi) |&gt;
+    leaflet::addCircles(color = &quot;green&quot;) |&gt;
+    leaflet::addCircles(data = station, color = &quot;red&quot;, opacity = 1) |&gt;
+    leaflet::setView(lng = sf::st_coordinates(station)[, 1], lat = sf::st_coordinates(station)[, 2],
+        zoom = 14)</code></pre>
+<pre class="r"><code>city &lt;- &quot;Almere&quot;
+cityrast_id &lt;- which(rast$GM_NAAM == city)  # will come handy later ;)
+cityrast &lt;- rast[cityrast_id, ]</code></pre>
+<pre class="r"><code>distmat &lt;- matrix(sf::st_distance(cityrast), ncol = nrow(cityrast))
+distmat &lt;- distmat / 1000
+
+
+diag(distmat) &lt;- 0.052140543316</code></pre>
+<pre class="r"><code>egocell &lt;- 100 # we pick the 100th cell in the raster.
+
+palette &lt;- leaflet::colorNumeric(
+  palette = &quot;viridis&quot;,
+  domain = distmat[egocell,]
+)
+leaflet::leaflet(cityrast) |&gt;
+  leaflet::addTiles() |&gt;
+  leaflet::addProviderTiles(providers$Stamen.Toner) |&gt;
+  leaflet::addCircles( # Plotting the raster with color to represent distances
+    data = cityrast,
+    label = ~round(distmat[egocell,], digits = 3), # Hovering shows the distance
+    color = ~palette(distmat[egocell,]),
+    opacity = 0.7
+  ) |&gt;
+  leaflet::addCircles( # Plotting our &quot;egocell&quot; (in red)
+    data = cityrast[egocell,],
+    label = &quot;Ego&quot;,
+    color = &quot;red&quot;,
+    opacity = 1
+  ) |&gt;
+  leaflet::addLegend(
+    &quot;topleft&quot;,
+    pal = palette, 
+    values = ~distmat[egocell,],
+    title = &quot;Distance to ego (km)&quot;,
+    opacity = 0.8
+  )</code></pre>
+<pre class="r"><code>s &lt;- 2
+proxmat &lt;- exp(-distmat * s)</code></pre>
+<pre class="r"><code>egocell &lt;- 100 # we pick the 100th cell in the raster.
+
+palette &lt;- leaflet::colorNumeric(
+  palette = &quot;viridis&quot;,
+  domain = proxmat[egocell,]
+)
+leaflet::leaflet(cityrast) |&gt;
+  leaflet::addTiles() |&gt;
+  leaflet::addProviderTiles(providers$Stamen.Toner) |&gt;
+  leaflet::addCircles(
+    data = cityrast,
+    label = ~round(proxmat[egocell,], digits = 3),
+    color = ~palette(proxmat[egocell,]),
+    opacity = 0.7
+  ) |&gt;
+  leaflet::addCircles( # Plotting our &quot;egocell&quot; (in red)
+    data = cityrast[egocell,],
+    label = &quot;Ego&quot;,
+    color = &quot;red&quot;,
+    opacity = 1
+  ) |&gt;
+  leaflet::addLegend(
+    &quot;topleft&quot;,
+    pal = palette, 
+    values = ~proxmat[egocell,],
+    title = &quot;Proximity to Ego&quot;,
+    opacity = 0.8
+  )</code></pre>
+<pre class="r"><code>cityrast$pnw &lt;- cityrast$percentage_niet_westerse_migr_achtergr
+cityrast$pnw[cityrast$pnw == -99997] &lt;- 0  # or some other arbitrary value
+cityrast$pnw &lt;- cityrast$pnw/100</code></pre>
+<pre class="r"><code>cityrast$n_nw &lt;- cityrast$aantal_inwoners * cityrast$pnw
+cityrast$n_w &lt;- cityrast$aantal_inwoners - cityrast$n_nw
+cityrast$n_w[cityrast$n_w == -99997] &lt;- 0 
+plot(cityrast$n_nw, cityrast$n_w)</code></pre>
+<pre class="r"><code>palette &lt;- leaflet::colorNumeric(
+  palette = &quot;viridis&quot;,
+  domain = cityrast$pnw
+)
+leaflet::leaflet(cityrast) |&gt;
+  leaflet::addTiles() |&gt;
+  leaflet::addProviderTiles(providers$Stamen.Toner) |&gt;
+  leaflet::addCircles(
+    data = cityrast,
+    color = ~palette(cityrast$pnw),
+    #radius = ~cityrast$aantal_inwoners
+  ) |&gt;
+  leaflet::addLegend(
+    &quot;topleft&quot;,
+    pal = palette, 
+    values = ~cityrast$pnw,
+    title = &quot;Prop. NW migr. background&quot;
+  )</code></pre>
+<pre class="r"><code>fcalcLocalEnv &lt;- function( # &quot;data&quot; is a 2-columns matrix
+  data, coords, distmat, s, proj4string = sp::CRS(&quot;+proj=longlat +datum=WGS84&quot;)
+  ) {
+  
+  # Recalculating proximities:
+  proxmat &lt;- exp(- distmat * s)
+  
+  # Calculating the local environment from scratch:
+  #if(is.null(data)) data &lt;- as.matrix(cbind(cityrast$n_w, cityrast$n_nw))
+  env &lt;- matrix(NA, nrow = nrow(data), ncol = 2)
+  for (i in 1:nrow(data)) {
+    env[i,1] &lt;- stats::weighted.mean(x = data[,1], w = proxmat[i,])
+    env[i,2] &lt;- stats::weighted.mean(x = data[,2], w = proxmat[i,])
+  }
+  
+  # And now we bundle this all together in an object of class
+  # &quot;SegLocal&quot;, which allows us to use the functions from the package
+  # &quot;seg&quot; to calculate the various measures of segregation.
+  return(seg::SegLocal(
+    coords = coords,
+    data = data,
+    env = env,
+    proj4string = proj4string
+  ))
+}
+
+fcalcLocalEnv &lt;- cmpfun(fcalcLocalEnv)</code></pre>
+<pre class="r"><code>myenv &lt;- fcalcLocalEnv(data = as.matrix(cbind(cityrast$n_w, cityrast$n_nw)), distmat = distmat, coords = sf::st_coordinates(cityrast),
+    s = s  #already defined above
+)</code></pre>
+<pre class="r"><code>I &lt;- fMoranIdens (
+  x = myenv@data[,1] / rowSums(myenv@data), #proportion of majority in each cell
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  dens = rowSums(myenv@data) / sum(myenv@data), #the proportion of the population in this cell compared to total environment
+  N = sum(myenv@data) #total population size
+)
+I$globalI</code></pre>
+<pre class="r"><code>cityvor &lt;- voronoi[voronoi$voronoi %in% rast$voronoi[cityrast_id], ]</code></pre>
+<pre class="r"><code># slope of the distance decay function:
+s &lt;- 2
+
+# For each voronoi tile &quot;i&quot; in the city...
+for (u in 1:nrow(cityvor)) {
+  
+  #... we find which raster cells belong to tile &quot;i&quot;.
+  #tilerast &lt;- subset(cityrast, cityrast$voronoi == cityvor$voronoi[u])
+  tilerast &lt;- cityrast[cityrast$voronoi == cityvor$voronoi[u],]
+  
+  # And if there are more than 2 tiles...
+  if (nrow(tilerast) &gt; 1) {
+    # ... then calculate distances among its raster cells...
+    distmat &lt;- matrix(sf::st_distance(tilerast), ncol = nrow(tilerast))
+    distmat &lt;- distmat / 1000
+    
+    #... set the diagonal of the distance matrix...
+    diag(distmat) &lt;- 0.052140543316
+    
+    #... calculate the local environment of each cell...
+    myenv &lt;- fcalcLocalEnv(
+      data = as.matrix(cbind(tilerast$n_w, tilerast$n_nw)),
+      distmat = distmat,
+      coords = sf::st_coordinates(tilerast),
+      s = s
+    )
+    
+    #use the seg package to calculate segregation measures. 
+    # use your own segregtion functions and functions of oasisR
+    proxmat &lt;- exp(-distmat*s)
+    
+    
+    #seg
+    isp&lt;-isp(
+      x=myenv@coords,
+      data=myenv@data,
+      nb=distmat
+    )
+    
+    deseg&lt;-deseg(
+      x=myenv@coords,
+       data=myenv@data,
+       smoothing = &quot;kernel&quot;
+    )
+    
+    
+    
+    #... calculate the I...
+    #density corrected based on proportions
+   
+    I &lt;- fMoranIdens (
+      x = myenv@data[,1] / rowSums(myenv@data),
+      weight = proxmat, ## The diagonal in distmat is ~51 meters
+      dens = rowSums(myenv@data) / sum(myenv@data), 
+      N = sum(myenv@data)
+      )
+    # 
+    # I &lt;- fMoranI (
+    #   x = myenv@data[,1],
+    #   y = myenv@data[,2],
+    #   weight = proxmat, ## The diagonal in distmat is ~51 meters
+    #   scaled = FALSE,
+    #   rowstandardize = TRUE
+    # )
+    # 
+    
+    #... and, finally, save the I estimate to our data.frame &quot;vor&quot;:
+    cityvor$moranI[u] &lt;- I$globalI
+    cityvor$isp[u]&lt;-isp
+    cityvor$deseg[u]&lt;-deseg@d
+  }
+  
+}</code></pre>
+<pre class="r"><code>load(&quot;./data/processed/20220713positions&quot;)
+positions &lt;- x
+rm(x)
+
+almere&lt;-positions %&gt;% 
+filter(gmcode==&quot;GM0034&quot;)
+
+coords &lt;- almere[, c(&quot;long&quot;, &quot;lat&quot;)]  # coordinates
+crs &lt;- st_crs(&quot;+proj=longlat +ellps=WGS84 +datum=WGS84&quot;)
+almere_sf &lt;- sf::st_as_sf(x = almere, coords = c(&quot;long&quot;, &quot;lat&quot;), crs = crs)</code></pre>
+<pre class="r"><code>palette &lt;- leaflet::colorNumeric(
+  palette = &quot;viridis&quot;, # or other RColorBrewer palettes e.g &quot;Greens&quot;, &quot;magma&quot;
+  domain = cityvor$moranI
+)
+palette2 &lt;- leaflet::colorNumeric(
+  palette = &quot;magma&quot;, # or other RColorBrewer palettes e.g &quot;Greens&quot;, &quot;magma&quot;
+  domain = almere_sf$Pvar
+)
+leaflet::leaflet(cityvor) |&gt;
+  leaflet::addTiles() |&gt;
+  leaflet::addProviderTiles(providers$Stamen.Toner) |&gt;
+  leaflet::addPolygons(
+    label = ~moranI,
+    color = ~palette(moranI),
+    opacity = 0.7
+  ) |&gt;
+  leaflet::addCircles(
+  data=almere_sf,
+  color=~palette2(almere_sf$Pvar),
+  radius = 10,
+  label= ~Pvar) %&gt;%
+  leaflet::addLegend(
+    &quot;topleft&quot;,
+    pal = palette, 
+    values = ~moranI,
+    title = &quot;Moran I&quot;,
+    opacity = 0.7
+  ) %&gt;% 
+  leaflet::addLegend(
+    &quot;topleft&quot;,
+    pal = palette2, 
+    values = almere$Pvar,
+    title = &quot;Pvar&quot;,
+    opacity = 0.7
+  )</code></pre>
+<pre class="r"><code>pollstations_almere &lt;- sf::st_intersection(x = almere_sf, y = cityvor, sf::sf_use_s2(FALSE))</code></pre>
+<pre class="r"><code>pollstations_almere2&lt;-pollstations_almere %&gt;% 
+  select(-PER,-PV) %&gt;% 
+  na.omit()
+cor(pollstations_almere2$Pvar, pollstations_almere2$moranI, method =&quot;pearson&quot;)
+
+plot(pollstations_almere2$Pvar, pollstations_almere2$moranI)</code></pre>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

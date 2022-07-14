@@ -9,10 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="by: Dávid Sümeghy" />
 
 
-<title>Lab journal</title>
+<title>forloopsp.knit</title>
 
 <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -33,10 +32,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/clipboard-1.7.1/clipboard.min.js"></script>
-<link href="site_libs/primer-tooltips-1.4.0/build.css" rel="stylesheet" />
-<link href="site_libs/klippy-0.0.0.9500/css/klippy.min.css" rel="stylesheet" />
-<script src="site_libs/klippy-0.0.0.9500/js/klippy.min.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -299,42 +294,14 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Lab journal</h1>
-<h4 class="author">by: Dávid Sümeghy</h4>
 
 </div>
 
 
-<script>
-  addClassKlippyTo("pre.r, pre.markdown");
-  addKlippy('right', 'top', 'auto', '1', 'Copy code', 'Copied!');
-</script>
-<hr />
-<div class="columns">
-<div class="column" style="width:50%;">
-<div id="bigsss-css-segregation-polarisation" class="section level3">
-<h3>BIGSSS-CSS: Segregation-Polarisation</h3>
-<p>Last compiled on július, 2022</p>
-<p><br></p>
-<hr />
-<p>Participants of the BIGSSS Summer School can fork this repository. Using this, they can journal their work and assignments.</p>
-</div>
-</div><div class="column" style="width:50%;">
-<p><img src="images/image.jpg" /></p>
-</div>
-</div>
-<div id="how-to-use" class="section level2">
-<h2>How to use</h2>
-<ol style="list-style-type: decimal">
-<li><p>Fork the repository for this website and follow instructions on <code>README</code> to get started <a href="https://github.com/robfranken/bigssslabjournal">here</a>.</p></li>
-<li><p>Journal your work, by editing the .Rmd-files</p></li>
-<li><p>…</p></li>
-<li><p>Change everything to make it your own!</p></li>
-</ol>
-<p><br></p>
-<p>Use the top menu to navigate through the journal.</p>
-<hr />
-</div>
+<p>#for loop SP dist_m&lt;-(as.matrix(dist(cbind(x, y)),diag=T, upper=T)) # distance matrix</p>
+<p>pmm &lt;-size &lt;- rep(NA,length(unique(group))) # in this object i am saving the mean distance</p>
+<p>for(i in 1:length(unique(group))){ # loop for each unique group subs &lt;- group==unique(group)[i] # define substracts as the unique groups pmm[i]&lt;-mean(dist_m[subs,subs]) # calculate mean distance between the members of the same group size[i]&lt;-sum(subs) # calculate group sizes }</p>
+<p>pi_m_t_p_mm&lt;-sum(pmm<em>size)/sum(size) #calculate pi_m </em> p_mm SP&lt;-pi_m_t_p_mm/mean(dist_m)</p>
 
 
 

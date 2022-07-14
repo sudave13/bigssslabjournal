@@ -347,12 +347,21 @@ div.tocify {
     <li>
       <a href="lab3.html">Day 3</a>
     </li>
+    <li>
+      <a href="lab5.html">Day 5</a>
+    </li>
+    <li>
+      <a href="lab6.html">Day 6</a>
+    </li>
+    <li>
+      <a href="assignment.html">Final presentation</a>
+    </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/robfranken/bigssslabjournal">
+  <a href="https://github.com/sudave13/bigssslabjournal">
     <span class="fab fa-github"></span>
      
   </a>
@@ -525,7 +534,8 @@ mutate(party = recode(party, &#39;forum voor democratie&#39;= &#39;fvd&#39;))
 merge$party &lt;- tolower(merge$party)</code></pre>
 <pre class="r test"><code>finalmerge &lt;- merge(merged, merge, by = &quot;party&quot;, all = T) </code></pre>
 <pre class="r test"><code>fsave(finalmerge, &quot;positions_data.RData&quot;)</code></pre>
-<pre class="test2"><code>#&gt; [1] &quot;SAVED: ./data/processed/20220707positions_data.RData&quot;</code></pre>
+<pre class="test2"><code>#&gt; [1] &quot;SAVED: ./data/processed/20220713positions_data.RData&quot;</code></pre>
+<p>fsave(merged, “positions_data2.RData”)</p>
 
 
 

@@ -1,0 +1,243 @@
+---
+title: "Journal 1"
+#bibliography: references.bib
+author: "Dávid Sümeghy"
+output: 
+  html_document:
+    css: tweaks.css
+    toc:  true
+    toc_float: true
+    number_sections: false
+  
+---
+
+```{r}
+rm(list = ls())
+gc()
+```
+
+```{r}
+fsave <- function(x, file, location = "./data/processed/", ...) {
+    if (!dir.exists(location))
+        dir.create(location)
+    datename <- substr(gsub("[:-]", "", Sys.time()), 1, 8)
+    totalname <- paste(location, datename, file, sep = "")
+    print(paste("SAVED: ", totalname, sep = ""))
+    save(x, file = totalname)
+}
+
+fpackage.check <- function(packages) {
+    lapply(packages, FUN = function(x) {
+        if (!require(x, character.only = TRUE)) {
+            install.packages(x, dependencies = TRUE)
+            library(x, character.only = TRUE)
+        }
+    })
+}
+
+colorize <- function(x, color) {
+    sprintf("<span style='color: %s;'>%s</span>", color, x)
+}
+```
+
+```{r}
+packages = c("sf", "ggplot2", "ggmap", "leaflet","osrm")
+
+fpackage.check(packages)
+```
+OSRM: An interface between R and the 'OSRM' API. 'OSRM' is a routing service based on 'OpenStreetMap' data. See <http://project-osrm.org/> for more information. This package allows to compute routes, trips, isochrones and travel distances matrices (travel time and kilometric distance).
+
+```{r,eval=FALSE}
+# Loading 100m-by-100m raster data:
+rast <- sf::st_read(dsn = "./data/rawGIS/2022-cbs_vk100_2021_v1/cbs_vk100_2021_v1.gpkg")
+
+
+# Next we load the shapefile of the administrative neighbourhoods ('buurt') and districts ('wijk'):
+neighbShape <- sf::st_read(dsn = "./data/rawGIS/WijkBuurtkaart_2021_v1", layer = "buurt_2021_v1")
+districtShape <- sf::st_read(dsn = "./data/rawGIS/WijkBuurtkaart_2021_v1", layer = "wijk_2021_v1")
+# ... And then the zipcode shapes:
+postcode4Shape <- sf::st_read(dsn = "./data/rawGIS/CBS-PC4-2020-v1", layer = "CBS_pc4_2020_v1")
+postcode5Shape <- sf::st_read(dsn = "./data/rawGIS/CBS-PC5-2020-v1", layer = "CBS_pc5_2020_v1")
+postcode6Shape <- sf::st_read(dsn = "./data/rawGIS/CBS-PC6-2020-v1", layer = "CBS_pc6_2020_v1")
+```
+```{r,eval=FALSE}
+rast <- sf::st_transform(x = rast, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+
+rast <- sf::st_centroid(rast)
+```
+
+```{r,eval=FALSE}
+neighbShape <- sf::st_transform(x = neighbShape, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+districtShape <- sf::st_transform(x = districtShape, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+postcode4Shape <- sf::st_transform(x = postcode4Shape, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+postcode5Shape <- sf::st_transform(x = postcode5Shape, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+postcode6Shape <- sf::st_transform(x = postcode6Shape, crs = sf::st_crs("+proj=longlat +datum=WGS84"))
+```
+
+```{r,eval=FALSE}
+city <- "Delft"
+
+# Selecting relevant districts:
+shape <- districtShape[districtShape$GM_NAAM == city,]
+
+# Assigning random colors to the districts:
+shape$color <- sample(rainbow(n = nrow(shape)))
+
+leaflet::leaflet(shape) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |> # Basemap style
+  leaflet::addPolygons(color = ~color, fillColor = ~color, label = ~WK_NAAM)
+```
+
+```{r, eval=FALSE}
+# Adding administrative area information:
+rast <- sf::st_intersection(x = sf::st_as_sf(rast), y = neighbShape, sf::sf_use_s2(FALSE)  # See https://github.com/r-spatial/sf/issues/1817
+)[,c(1:39, 78)]  # selecting only relevant columns
+
+# Adding postcode information:
+rast <- sf::st_intersection(x = sf::st_as_sf(rast), y = postcode6Shape, sf::sf_use_s2(FALSE))[, c(1:40,
+    74)]  # selecting only relevant columns
+
+# We now have the 6-digits postcodes; the 4- and 5- digits postcodes then are:
+rast$PC5 <- substr(rast$PC6, start = 1, stop = 5)
+rast$PC4 <- substr(rast$PC6, start = 1, stop = 4)
+```
+
+```{r,eval=FALSE}
+fsave(rast, compress = TRUE, file = "raster.RData")
+```
+```{r,eval=FALSE}
+load("./data/processed/20220708polling_df")
+pollstations <- x
+rm(x)
+```
+
+```{r,eval=FALSE}
+load("./data/processed/20220712raster.RData")
+rast <- x
+rm(x)
+```
+
+```{r,eval=FALSE}
+pollstations <- sf::st_geometry(sf::st_as_sf(x = as.data.frame(pollstations), crs = sf::st_crs("+proj=longlat +datum=WGS84"),
+    coords = c("long", "lat")))
+# head(pollstations) #just some points, the coordinates of the polling stations
+```
+
+```{r,eval=FALSE}
+voronoi <- sf::st_voronoi(
+  x = do.call(c, pollstations), #simply "c(pollstations)" doesn't work 
+  envelope = NULL # this is in case we want to specify the Voronoi boundaries
+)
+
+#This ensures that 'voronoi' has the correct CRS
+voronoi <- sf::st_sf(
+  sf::st_collection_extract(voronoi, type = "POLYGON"),
+  crs = sf::st_crs("+proj=longlat +datum=WGS84")
+)
+
+#This will be the "id" of each Voronoi tile:
+voronoi$voronoi <- 1:nrow(voronoi) 
+```
+
+```{r,eval=FALSE}
+leaflet::leaflet(voronoi) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addPolygons(color = "blue") |>
+  leaflet::addCircles(data = pollstations, color = "red") |>
+  leaflet::setView( # This defaults the map view so that it points to Amsterdam
+    lng = 4.9041,
+    lat = 52.3676,
+    zoom = 14
+  )
+```
+
+```{r,eval=FALSE}
+rast <- sf::st_intersection(x = sf::st_as_sf(rast), y = voronoi, sf::sf_use_s2(FALSE))
+```
+```{r,eval=FALSE}
+fsave(rast, compress = TRUE, file = "raster_vor.RData")
+```
+
+
+```{r,eval=FALSE}
+neighbShape <- neighbShape[, c(1, 2, 42:44)]
+districtShape <- districtShape[, c(1:4, 39:41)]
+postcode4Shape <- postcode4Shape[, c(1, 37)]
+postcode5Shape <- postcode5Shape[, c(1, 37)]
+postcode6Shape <- postcode6Shape[, c(1, 35)]
+fsave(list(neighbShape, districtShape, postcode4Shape, postcode5Shape, postcode6Shape, voronoi), compress = TRUE,
+    file = "shapes.RData")
+```
+```{r}
+
+load("./data/processed/20220712raster.RData")
+rast <- x
+rm(x)
+
+
+load("./data/processed/20220712shapes.RData")
+shape <- x
+rm(x)
+```
+
+
+```{r,eval=FALSE}
+load("./data/processed/20220708polling_df")
+pollstations <- x
+rm(x)
+
+# head(pollstations) #just some points, the coordinates of the polling stations
+krimpen_rast<-rast %>% 
+  dplyr::filter(GM_CODE=="GM0542") #filtering rasters of Krimpen aan den IJssel
+
+krimpen_poll<-pollstations %>% 
+  dplyr::filter(gmcode=="GM0542")  #filtering polling stationsin Krimpen aan den IJssel
+
+krimpen_poll_sf<-sf::st_geometry(sf::st_as_sf(x = as.data.frame(krimpen_poll), crs = sf::st_crs("+proj=longlat +datum=WGS84"),
+    coords = c("long", "lat"))) # define projection
+
+krimpen_poll_sf_2<-st_as_sf(krimpen_poll_sf) # list to sf
+
+osm_dist<-osrmTable(src=krimpen_poll_sf_2[,], 
+          dst=krimpen_rast[1:100,]) #API does not allow calculations on the whole dataset
+          
+osm_dist_df<-as.data.frame(osm_dist$durations)  
+
+apply(osm_dist_df,2,which.min) #selecting the closest polling stations
+```
+
+```{r,eval=FALSE}
+rast$percentage_westerse_migr_achtergr[rast$percentage_westerse_migr_achtergr == -99997] <- NA
+rast$percentage_nederlandse_achtergrond[rast$percentage_nederlandse_achtergrond == -99997] <- NA #replace hidden values with NA
+
+rast2<-rast %>% 
+filter(GM_CODE=="GM0983") #filtering Venlo
+coordinates<-st_coordinates(rast2$geom) #obtaining coordinates
+western_ethnicdf<-as.data.frame(rast2$percentage_westerse_migr_achtergr) #creating the data frame
+dutch_ethnicdf<-as.data.frame(rast2$percentage_nederlandse_achtergron)
+voronoi<-as.data.frame(rast2$voronoi)
+ethnic_df<-cbind(western_ethnicdf,dutch_ethnicdf,voronoi)
+
+
+dist_m<-as.matrix(dist(coordinates,method="euclidean")) #distance matrix
+
+names(ethnic_df)[1] <- "western" #rename columns
+names(ethnic_df)[2] <- "dutch"
+names(ethnic_df)[3] <- "voronoid"
+
+voro_split <- split(ethnic_df, ethnic_df$voronoid)
+str(voro_split)
+
+s <- 1
+```
+
+
+
+
+
+
+
+
+

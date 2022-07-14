@@ -1,0 +1,1021 @@
+---
+title: "Final presentation"
+#bibliography: references.bib
+author: "Dávid Sümeghy"
+output: 
+  html_document:
+    css: tweaks.css
+    toc:  true
+    toc_float: true
+    number_sections: false
+   
+---
+
+Cleaning up the local environment
+```{r}
+rm(list = ls())
+gc()
+```
+
+Coding custom functions, including Moran's I 
+```{r}
+fsave <- function(x, file, location = "./data/processed/", ...) {
+    if (!dir.exists(location))
+        dir.create(location)
+    datename <- substr(gsub("[:-]", "", Sys.time()), 1, 8)
+    totalname <- paste(location, datename, file, sep = "")
+    print(paste("SAVED: ", totalname, sep = ""))
+    save(x, file = totalname)
+}
+
+fpackage.check <- function(packages) {
+    lapply(packages, FUN = function(x) {
+        if (!require(x, character.only = TRUE)) {
+            install.packages(x, dependencies = TRUE)
+            library(x, character.only = TRUE)
+        }
+    })
+}
+
+colorize <- function(x, color) {
+    sprintf("<span style='color: %s;'>%s</span>", color, x)
+}
+
+fMoranI <- function(x, y = NULL, weight, scaled = FALSE, na.rm = FALSE, alternative = "two.sided", rowstandardize = TRUE) {
+    if (is.null(y)) {
+        y <- x
+    }
+
+    if (dim(weight)[1] != dim(weight)[2])
+        stop("'weight' must be a square matrix")
+    nx <- length(x)
+    ny <- length(y)
+    if (dim(weight)[1] != nx | dim(weight)[1] != ny)
+        stop("'weight' must have as many rows as observations in 'x' (and 'y', for the bivariate case) ")
+    ei <- -1/(nx - 1)
+    nas <- is.na(x) | is.na(y)
+    if (any(nas)) {
+        if (na.rm) {
+            x <- x[!nas]
+            y <- y[!nas]
+            nx <- length(x)
+            weight <- weight[!nas, !nas]
+        } else {
+            warning("'x' and/or 'y' have missing values: maybe you wanted to set na.rm = TRUE?")
+            return(list(observed = NA, expected = ei, sd = NA, p.value = NA))
+        }
+    }
+    if (rowstandardize) {
+        ROWSUM <- rowSums(weight)
+        ROWSUM[ROWSUM == 0] <- 1
+        weight <- weight/ROWSUM
+    }
+    s <- sum(weight)
+    mx <- mean(x)
+    sx <- x - mx
+    my <- mean(y)
+    sy <- y - my
+    v <- sum(sx^2)
+    cv <- sum(weight * sx %o% sy)
+    obs <- (nx/s) * (cv/v)
+    cv_loc <- rowSums(weight * sx %o% sy)
+    obs_loc <- (nx/s) * (cv_loc/v)
+    if (scaled) {
+        i.max <- (nx/s) * (sd(rowSums(weight) * sx)/sqrt(v/(nx - 1)))
+        obs <- obs/i.max
+        obs_loc <- obs_loc/i.max
+    }
+    S1 <- 0.5 * sum((weight + t(weight))^2)
+    S2 <- sum((apply(weight, 1, sum) + apply(weight, 2, sum))^2)
+    s.sq <- s^2
+    k <- (sum(sx^4)/nx)/(v/nx)^2
+    sdi <- sqrt((nx * ((nx^2 - 3 * nx + 3) * S1 - nx * S2 + 3 * s.sq) - k * (nx * (nx - 1) * S1 - 2 *
+        nx * S2 + 6 * s.sq))/((nx - 1) * (nx - 2) * (nx - 3) * s.sq) - 1/((nx - 1)^2))
+    alternative <- match.arg(alternative, c("two.sided", "less", "greater"))
+    pv <- pnorm(obs, mean = ei, sd = sdi)
+    if (alternative == "two.sided")
+        pv <- if (obs <= ei)
+            2 * pv else 2 * (1 - pv)
+    if (alternative == "greater")
+        pv <- 1 - pv
+    list(observed = obs, expected = ei, sd = sdi, p.value = pv, observed_locals = obs_loc)
+
+
+}
+fMoranI <- compiler::cmpfun(fMoranI)
+
+# Moran's I for aggregated
+# data_____________________________________________________________________
+fMoranIdens <- function(x, y = NULL, weight, dens = NULL, N = length(x)) {
+    # Adapted from Anselin (1995, eq. 7, 10, 11)
+    # https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1538-4632.1995.tb00338.x dens: the
+    # proportion of individuals in each cell over the district population if individual level data
+    # dens is.null and N is simply length of input if we have aggregate data then N should be total
+    # population size (or actually just a large number)
+    if (is.null(y)) {
+        y <- x
+    }
+    # N <- length(x)
+    if (is.null(dens)) {
+        dens <- rep(1/N, times = N)
+    }
+
+    # correct scaling of opinions for densities #this is really inefficient, should use weighted
+    # var from hmsci
+    v1dens_ind <- rep(x, times = (dens * N))
+    v1dens <- (x - mean(v1dens_ind))/sd(v1dens_ind)
+    v2dens_ind <- rep(y, times = (dens * N))
+    v2dens <- (y - mean(v2dens_ind))/sd(v2dens_ind)
+
+    # (density) weighted proximity matrix
+    w <- weight
+    wdens <- t(dens * t(w))
+    wdens <- wdens/rowSums(wdens)
+
+    # density and proximity weighted locals
+    localI <- (v1dens * wdens %*% v2dens)  #formula 7
+
+    # correct the normalization constants
+    m2 <- sum(v1dens^2 * dens)
+    S0 <- N  #we know the weight matrix for the individual level should add up to N
+    ydens <- S0 * m2
+    globalI <- sum(localI * dens * N)/ydens  # formula 10/11
+
+    return(list(globalI = globalI, localI = as.numeric(localI)))
+}
+fMoranIdens <- compiler::cmpfun(fMoranIdens)
+
+```
+
+```{r}
+fpackage.check(c("sf", "seg", "leaflet", "ggplot2", "ggmap","ggimage", "compiler","tidyverse"))
+```
+Coding polarization indices
+Pvar = Variance in the pairwise opinion differences
+PV = Distance to the center
+PER = Esteban-Rey
+```{r}
+fPvar <- function(votes, positions, method = "euclidean") {
+    positions <- positions * 2  #this function wants a range of 2
+    distances <- as.matrix(dist(positions, method = method))
+    votes_mat <- votes %o% votes
+    diag(votes_mat)[diag(votes_mat) > 1] <- diag(votes_mat)[diag(votes_mat) > 1] - 1
+    Pvar <- Hmisc::wtd.var(as.numeric(distances), as.numeric(votes_mat))
+    return(Pvar)
+}
+
+fPvar <- cmpfun(fPvar)
+
+fPV <- function(votes, positions, method = "euclidean") {
+    shares <- votes/sum(votes, na.rm = TRUE)
+    pbar <- rep(NA, NCOL(positions))
+    pbar <- as.numeric(t(shares) %*% positions)  #center of mass / mean position
+
+    # distances to mean
+    if (method != "sq") {
+        if (NCOL(positions) == 1) {
+            distances <- as.matrix(stats::dist(c(pbar, positions), method = method))[, 1][-1]
+        } else {
+            distances <- as.matrix(stats::dist(rbind(pbar, positions), method = method))[, 1][-1]
+        }
+    }
+    # if (method=='sq') {distances <- ??}
+
+    # defining the constant
+    if (method == "euclidean") {
+        k <- 2/sqrt(NCOL(positions))
+    }
+    if (method == "manhattan") {
+        k <- 2/NCOL(positions)
+    }
+    if (method == "sq") {
+        k <- 1
+    }
+    PV <- k * sum(shares * distances)
+    return(PV)
+}
+fPV <- cmpfun(fPV)
+
+fPER <- function(alpha = 1, votes, positions, method = "euclidean") {
+    positions <- positions
+    distances <- as.matrix(stats::dist(positions, method = method))
+    shares <- votes/sum(votes, na.rm = TRUE)
+    sharesi <- shares^(1 + alpha)
+    sharesj <- shares
+    ER <- as.numeric(sharesi %*% distances %*% sharesj)
+    return(ER)
+}
+
+fPER <- cmpfun(fPER)
+```
+
+
+Loading prerecorded data (100x100 raster, voronoid, polling station results, party positions)
+```{r}
+load("./data/processed/20220713raster_vor.RData")
+rast <- x
+rm(x)
+
+load("./data/processed/20220712shapes.RData")
+shapes <- x
+rm(x)
+voronoi <- shapes[[6]]
+
+load("./data/processed/20220708polling_df")
+pollstations <- x
+rm(x)
+
+# Ensuring that the class of 'pollstations' is 'sf' and the CRS is correct:
+pollstations <- sf::st_as_sf(x = as.data.frame(pollstations), crs = sf::st_crs("+proj=longlat +datum=WGS84"),
+    coords = c("long", "lat"))
+
+load("./data/processed/20220713positions_data2.RData")
+positions_df<- x
+
+```
+
+Calculating polarization based on party positions. Here i am using the Chapel Hill Election Survey, which is based on expert ratings. I calculated the median of the experts' ratings based on the literature recommendation.I examine the positions twice on two axes, with relevant political issues selected on the basis of opinion polls. I have placed the parties once along the axes of (y)environmental protection and (x)immigration policy and a second time along the axes of (y)redistributive policy and (x)state intervention in the economy.
+```{r}
+js_df <- ungroup(pollstations)
+
+js_df$Pvar1 <- rep(NA, nrow(js_df))
+js_df$PER1 <- rep(NA, nrow(js_df))
+js_df$PV1 <- rep(NA, nrow(js_df))
+js_df$Pvar2 <- rep(NA, nrow(js_df))
+js_df$PER2 <- rep(NA, nrow(js_df))
+js_df$PV2 <- rep(NA, nrow(js_df))
+
+
+
+order <- c(3,12,9,15,11,7,16,6,5,1,13,4,2,14,17,10,8 )
+positions1 <- positions_df[order, c("party", "environment_median", "immigrate_policy_median") ]
+positions2 <- positions_df[order, c("party", "redistribution_median", "econ_interven_median") ]
+
+#check
+positions1
+
+
+#if everything okay, drop the column with the party names
+positions1 <- positions1[, -1]
+positions1<-positions1 %>% 
+  na.omit()
+positions1<-(cbind(positions1$environment_median,positions1$immigrate_policy_median))/10 #values between 0 and 1
+positions2 <- positions2[, -1]
+positions2<-positions2 %>% 
+  na.omit()
+positions2<-(cbind(positions2$reditribution_median,positions2$econ_interven_median))/10 #values between 0 and 1
+
+
+for (i in 1:nrow(js_df)) {
+    votes <- c(js_df$PvdD[i], js_df$GL[i], js_df$SP[i], js_df$PvdA[i], js_df$DENK[i], js_df$D66[i], js_df$CU[i], js_df$PLUS50[i], js_df$PVV[i], js_df$CDA[i],
+        js_df$SGP[i], js_df$VVD[i], js_df$FvD[i])
+    js_df$Pvar1[i] <- fPvar(votes = votes, positions = positions1)
+    js_df$PER1[i] <- fPER(votes = votes, positions = positions1)
+    js_df$PV1[i] <- fPV(votes = votes, positions = positions1)
+    js_df$Pvar2[i] <- fPvar(votes = votes, positions = positions2)
+    js_df$PER2[i] <- fPER(votes = votes, positions = positions2)
+    js_df$PV2[i] <- fPV(votes = votes, positions = positions2)
+}
+```
+
+Graph the positions of each party
+```{r}
+positions_df$image <- c("./data/parties_png/50Plus.jpg","./data/parties_png/BBB.jpg",
+"./data/parties_png/BIJ1.jpg", "./data/parties_png/CDA.jpg", "./data/parties_png/CU.jpg",
+"./data/parties_png/D66.jpg","./data/parties_png/DENK.jpg","./data/parties_png/FvD.jpg",
+"./data/parties_png/GL.jpg","./data/parties_png/JA21.jpg","./data/parties_png/PvdA.jpg",
+"./data/parties_png/PvdD.jpg","./data/parties_png/PVV.jpg","./data/parties_png/SGP.jpg",
+"./data/parties_png/SP.jpg", "./data/parties_png/VOLT.jpg","./data/parties_png/vvd.jpg" )
+p1 <- ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image)) + xlim(0, 10) + ylim(0, 10) + xlab("permissive imm. pol. <---------> strict imm. pol") +
+    ylab("environmental protection <---------> sustainability") + theme(aspect.ratio = 1)
+p1
+p2 <- ggplot(positions_df, aes(x=redistribution_median, y=econ_interven_median)) + geom_image(aes(image = image)) + xlim(0, 10) + ylim(0, 10) + xlab("favors redistribution <---------> opposes redistribution") +
+    ylab("in favor of st. intervent. <---------> against state intervention") + theme(aspect.ratio = 1)
+p2
+```
+
+Matching voronoids with polling stations using the spatial intersection function
+```{r}
+#pollstations <- sf::st_intersection(x = js_df, y = voronoi, sf::sf_use_s2(FALSE))
+#fsave(pollstations, "pollpol_data.RData")
+load("./data/processed/20220714pollpol_data.RData")
+pollstations<- x
+```
+
+# Nijmegen
+
+Selecting the rasters in Nijmegen
+```{r}
+city <- "Nijmegen"
+cityrast_id <- which(rast$GM_NAAM == city)  # will come handy later ;)
+cityrast <- rast[cityrast_id, ]
+```
+
+Preparing variables for the segregation analyses. I will analyse two types of segregation: ethnic (non-western immigrants vs western immigrant+Dutch) and housing (rented housing vs  homes occupied by their owner). 
+```{r}
+cityrast$pnw <- cityrast$percentage_niet_westerse_migr_achtergr
+cityrast$phw <- cityrast$percentage_huurwoningen
+cityrast <- cityrast[cityrast$aantal_inwoners != -99997, ]
+cityrast <- cityrast[cityrast$aantal_woningen != -99997, ]
+cityrast$pnw[cityrast$pnw == -99997] <- 0  # or some other arbitrary value
+cityrast$phw[cityrast$phw == -99997] <- 0  # or some other arbitrary value
+cityrast$pnw <- cityrast$pnw/100
+cityrast$phw <- cityrast$phw/100
+cityrast$n_nw <- cityrast$aantal_inwoners * cityrast$pnw
+cityrast$n_hw <- cityrast$aantal_woningen * cityrast$phw
+cityrast$n_w <- cityrast$aantal_inwoners - cityrast$n_nw
+cityrast$n_nonhw <- cityrast$aantal_woningen - cityrast$n_hw
+cor.test(cityrast$n_nw, cityrast$n_w)
+cor.test(cityrast$n_hw, cityrast$n_nonhw)
+
+
+plot(cityrast$n_nw, cityrast$n_w)
+plot(cityrast$n_hw, cityrast$n_nonhw)
+
+```
+
+Calculate the spatial matrix (in kilometres). Convert the diagonal to 0.0521 (the average distance between two points in a 100x100 metre area) 
+```{r}
+distmat <- matrix(sf::st_distance(cityrast), ncol = nrow(cityrast))
+distmat <- distmat/1000
+diag(distmat) <- 0.052140543316
+s <- 2
+proxmat <- exp(-distmat * s)
+```
+
+Let's examine the ethnic pattern!
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis",
+  domain = cityrast$pnw
+)
+leaflet::leaflet(cityrast) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addCircles(
+    data = cityrast,
+    color = ~palette(cityrast$pnw),
+    #radius = ~cityrast$aantal_inwoners,
+    opacity = ~(cityrast$aantal_inwoners / max(cityrast$aantal_inwoners))#0.7
+  ) |>
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~cityrast$pnw,
+    title = "Prop. NW migr. background",
+    opacity = 0.8
+  )
+```
+
+To measure segregation, it will be necessary to define the local environment. This function calculates it.
+```{r}
+fcalcLocalEnv <- function( # "data" is a 2-columns matrix
+  data, coords, distmat, s, proj4string = sp::CRS("+proj=longlat +datum=WGS84")
+  ) {
+  
+  # Recalculating proximities:
+  proxmat <- exp(- distmat * s)
+  
+  # Calculating the local environment from scratch:
+  #if(is.null(data)) data <- as.matrix(cbind(cityrast$n_w, cityrast$n_nw))
+  env <- matrix(NA, nrow = nrow(data), ncol = 2)
+  for (i in 1:nrow(data)) {
+    env[i,1] <- stats::weighted.mean(x = data[,1], w = proxmat[i,])
+    env[i,2] <- stats::weighted.mean(x = data[,2], w = proxmat[i,])
+  }
+  
+  # And now we bundle this all together in an object of class
+  # "SegLocal", which allows us to use the functions from the package
+  # "seg" to calculate the various measures of segregation.
+  return(seg::SegLocal(
+    coords = coords,
+    data = data,
+    env = env,
+    proj4string = proj4string
+  ))
+}
+
+fcalcLocalEnv <- compiler::cmpfun(fcalcLocalEnv)
+```
+
+```{r}
+myenv <- fcalcLocalEnv(data = as.matrix(cbind(cityrast$n_w, cityrast$n_nw)), distmat = distmat, coords = sf::st_coordinates(cityrast),
+    s = s  #already defined above
+)
+```
+
+Now we can measure segregation with different methods.
+
+Seg package
+```{r}
+seg::spatseg(env = myenv)
+```
+
+Bivariate Moran's I
+```{r}
+I <- fMoranI (
+  x = myenv@data[,1],
+  y = myenv@data[,2],
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  scaled = FALSE,
+  rowstandardize = TRUE
+)
+print(I[1:4])
+```
+
+Univariate Moran's I
+```{r}
+I <- fMoranI (
+  x = myenv@data[,1] / rowSums(myenv@data),
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  scaled = FALSE,
+  rowstandardize = TRUE,
+  na.rm=TRUE
+)
+print(I[1:4])
+```
+
+Univariate Moran's I, density corrected
+```{r}
+I <- fMoranIdens (
+  x = myenv@data[,1] / rowSums(myenv@data), #proportion of majority in each cell
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  dens = rowSums(myenv@data) / sum(myenv@data), #the proportion of the population in this cell compared to total environment
+  N = sum(myenv@data) #total population size
+)
+I$globalI
+```
+
+Selecting voronoids in Nijmegen
+```{r}
+cityvor <- voronoi[voronoi$voronoi %in% rast$voronoi[cityrast_id], ]
+```
+
+
+Calculating segregation scores of the voronoids
+```{r}
+# slope of the distance decay function:
+s <- 2
+
+# For each voronoi tile "i" in the city...
+for (u in 1:nrow(cityvor)) {
+  
+  #... we find which raster cells belong to tile "i".
+  #tilerast <- subset(cityrast, city#rast$voronoi == cityvor$voronoi[u])
+  tilerast <- cityrast[cityrast$voronoi == cityvor$voronoi[u],]
+  
+  # And if there are more than 2 tiles...
+  if (nrow(tilerast) > 1) {
+    # ... then calculate distances among its raster cells...
+    distmat <- matrix(sf::st_distance(tilerast), ncol = nrow(tilerast))
+    distmat <- distmat / 1000
+    
+    #... set the diagonal of the distance matrix...
+    diag(distmat) <- 0.052140543316
+    
+    #... calculate the local environment of each cell...
+    myenv1 <- fcalcLocalEnv(
+      data = as.matrix(cbind(tilerast$n_w, tilerast$n_nw)),
+      distmat = distmat,
+      coords = sf::st_coordinates(tilerast),
+      s = s
+    )
+     myenv2 <- fcalcLocalEnv(
+      data = as.matrix(cbind(tilerast$n_hw, tilerast$n_nonhw)),
+      distmat = distmat,
+      coords = sf::st_coordinates(tilerast),
+      s = s
+    )
+    
+    #use the seg package to calculate segregation measures. 
+    
+    #isp<-seg::isp(
+     #x=myenv@coords[,1:2],
+    #data=myenv@data[,1:2],
+    #nb=distmat
+  #)
+    
+    proxmat <- exp(-distmat*s)
+    
+    #le<-seg::localenv(
+      #x=myenv@coords,
+      #data=myenv@data,
+      #power=s,
+      #scale=FALSE
+    #)
+    
+    spatseg1<-seg::spatseg(
+    env=myenv1
+    )
+    spatseg2<-seg::spatseg(
+    env=myenv2
+    )
+    
+    #dissim<-seg::dissim(
+      #data=myenv@data,
+      #nb=distmat
+    #)
+    
+
+    # use your own segregtion functions and functions of oasisR
+    
+    #... calculate the I...
+    #density corrected based on proportions
+    I1 <- fMoranIdens (
+      x = myenv1@data[,1] / rowSums(myenv1@data),
+      weight = proxmat, ## The diagonal in distmat is ~51 meters
+      dens = rowSums(myenv1@data) / sum(myenv1@data), 
+      N = sum(myenv1@data)
+      )
+     
+    I2 <- fMoranIdens (
+      x = myenv2@data[,1] / rowSums(myenv2@data),
+      weight = proxmat, ## The diagonal in distmat is ~51 meters
+      dens = rowSums(myenv2@data) / sum(myenv2@data), 
+      N = sum(myenv2@data)
+      )
+     #I <- fMoranI (
+      # x = myenv@data[,1],
+       #y = myenv@data[,2],
+       #weight = proxmat, ## The diagonal in distmat is ~51 meters
+    #   scaled = FALSE,
+    #   rowstandardize = TRUE
+    # )
+    # 
+    
+    #... and, finally, save the I estimate to our data.frame "vor":
+    cityvor$moranI1[u] <- I1$globalI
+    cityvor$moranI2[u] <- I2$globalI
+    #cityvor$isp[u]<-isp
+   #cityvor$le[u]<-le@data
+   #cityvor$dis[u]<-dissim$d
+   cityvor$spatseg1[u]<-spatseg1@d
+   cityvor$spatseg2[u]<-spatseg2@d
+  }
+  
+}
+```
+
+Adding polling result and polarisation data
+```{r}
+city_positions<-pollstations %>% 
+filter(gmcode=="GM0268")
+```
+
+Analyse the relationship between political polarisation and segregation
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = cityvor$spatseg1
+)
+palette2 <- leaflet::colorNumeric(
+  palette = "Oranges", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = city_positions$PV1
+)
+leaflet::leaflet(cityvor) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addPolygons(
+    label = ~spatseg1,
+    color = ~palette(spatseg1),
+    opacity = 0.7
+  ) |>
+  leaflet::addCircleMarkers(
+  data=city_positions,
+  fillColor=~palette2(city_positions$PV1),
+  fillOpacity=1,
+  radius =8,
+  label= ~PV1) %>%
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~spatseg1,
+    title = "Segregation (NW-D)"
+  ) |>
+leaflet::addLegend(
+    "topleft",
+    pal = palette2, 
+    values = city_positions$PV1,
+    title = "PV environment-immigration"
+  )
+```
+
+Matching polarisation data with segregation scores
+```{r}
+#pollstations_nijmegen <- sf::st_intersection(x = city_positions, y = cityvor, sf::sf_use_s2(FALSE))
+#fsave(pollstations_nijmegen, "pollnij_data.RData")
+load("./data/processed/20220714pollnij_data.RData")
+pollstations_nijmegen<- x
+```
+
+Correlations
+```{r}
+
+pollstations_nijmegen2<-st_set_geometry(pollstations_nijmegen,NULL)
+
+pollstations_nijmegen2 %>%
+    dplyr::select(Pvar1,Pvar2, PER1,PER2, PV1,PV2,moranI1,moranI1,spatseg1,spatseg2) %>% 
+    as.data.frame() %>%
+    cor(use = "pairwise.complete.obs")
+```
+Visualise polarized and nonpolarised polling stations (environment-immigration, nonwestern-western and dutch)
+```{r}
+votes <- cbind(city_positions$PLUS50,city_positions$CDA,city_positions$CU,city_positions$D66,city_positions$DENK,city_positions$FvD,city_positions$GL,city_positions$PvdA,city_positions$PvdD,city_positions$PVV,city_positions$SGP,city_positions$SP,city_positions$VVD)
+  
+
+row<-rowSums(votes)          
+shares <- votes/row
+
+positions_df<-positions_df %>% 
+  na.omit()
+
+plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing = TRUE)[1])
+
+ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
+    ylab("environmental protection <---------> sustainability")
+
+plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing = FALSE)[1])
+
+ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
+    ylab("environmental protection <---------> sustainability")
+```
+Visualise polarized and nonpolarised polling stations (redistribution-economy intervention, rented homes-homes occupied by the owners)
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = cityvor$spatseg2
+)
+palette2 <- leaflet::colorNumeric(
+  palette = "Oranges", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = city_positions$PVar2
+)
+leaflet::leaflet(cityvor) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addPolygons(
+    label = ~spatseg1,
+    color = ~palette(spatseg2),
+    opacity = 0.7
+  ) |>
+  leaflet::addCircleMarkers(
+  data=city_positions,
+  fillColor=~palette2(city_positions$Pvar2),
+  fillOpacity=1,
+  radius =8,
+  label= ~Pvar2) %>%
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~spatseg2,
+    title = "Segregation (Rented homed)"
+  ) |>
+leaflet::addLegend(
+    "topleft",
+    pal = palette2, 
+    values = city_positions$Pvar2,
+    title = "PVar economy-redistribution"
+  )
+```
+
+# Tilburg
+
+```{r}
+city <- "Tilburg"
+cityrast_id <- which(rast$GM_NAAM == city)  # will come handy later ;)
+cityrast <- rast[cityrast_id, ]
+```
+
+
+```{r}
+cityrast$pnw <- cityrast$percentage_niet_westerse_migr_achtergr
+cityrast$phw <- cityrast$percentage_huurwoningen
+cityrast <- cityrast[cityrast$aantal_inwoners != -99997, ]
+cityrast <- cityrast[cityrast$aantal_woningen != -99997, ]
+cityrast$pnw[cityrast$pnw == -99997] <- 0  # or some other arbitrary value
+cityrast$phw[cityrast$phw == -99997] <- 0  # or some other arbitrary value
+cityrast$pnw <- cityrast$pnw/100
+cityrast$phw <- cityrast$phw/100
+cityrast$n_nw <- cityrast$aantal_inwoners * cityrast$pnw
+cityrast$n_hw <- cityrast$aantal_woningen * cityrast$phw
+cityrast$n_w <- cityrast$aantal_inwoners - cityrast$n_nw
+cityrast$n_nonhw <- cityrast$aantal_woningen - cityrast$n_hw
+cor.test(cityrast$n_nw, cityrast$n_w)
+cor.test(cityrast$n_hw, cityrast$n_nonhw)
+
+
+plot(cityrast$n_nw, cityrast$n_w)
+plot(cityrast$n_hw, cityrast$n_nonhw)
+
+```
+
+
+```{r}
+distmat <- matrix(sf::st_distance(cityrast), ncol = nrow(cityrast))
+distmat <- distmat/1000
+diag(distmat) <- 0.052140543316
+s <- 2
+proxmat <- exp(-distmat * s)
+```
+
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis",
+  domain = cityrast$pnw
+)
+leaflet::leaflet(cityrast) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addCircles(
+    data = cityrast,
+    color = ~palette(cityrast$pnw),
+    #radius = ~cityrast$aantal_inwoners,
+    opacity = ~(cityrast$aantal_inwoners / max(cityrast$aantal_inwoners))#0.7
+  ) |>
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~cityrast$pnw,
+    title = "Prop. NW migr. background",
+    opacity = 0.8
+  )
+```
+
+
+```{r}
+myenv <- fcalcLocalEnv(data = as.matrix(cbind(cityrast$n_w, cityrast$n_nw)), distmat = distmat, coords = sf::st_coordinates(cityrast),
+    s = s  #already defined above
+)
+```
+
+```{r}
+seg::spatseg(env = myenv)
+```
+
+```{r}
+I <- fMoranI (
+  x = myenv@data[,1],
+  y = myenv@data[,2],
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  scaled = FALSE,
+  rowstandardize = TRUE
+)
+print(I[1:4])
+```
+
+```{r}
+I <- fMoranI (
+  x = myenv@data[,1] / rowSums(myenv@data),
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  scaled = FALSE,
+  rowstandardize = TRUE,
+  na.rm=TRUE
+)
+print(I[1:4])
+```
+
+```{r}
+I <- fMoranI (
+  x = myenv@data[,1] / rowSums(myenv@data),
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  scaled = FALSE,
+  rowstandardize = TRUE,
+  na.rm=TRUE
+)
+print(I[1:4])
+```
+
+```{r}
+I <- fMoranIdens (
+  x = myenv@data[,1] / rowSums(myenv@data), #proportion of majority in each cell
+  weight = proxmat, ## The diagonal in distmat is ~51 meters
+  dens = rowSums(myenv@data) / sum(myenv@data), #the proportion of the population in this cell compared to total environment
+  N = sum(myenv@data) #total population size
+)
+I$globalI
+```
+
+```{r}
+cityvor <- voronoi[voronoi$voronoi %in% rast$voronoi[cityrast_id], ]
+```
+
+```{r}
+# slope of the distance decay function:
+s <- 2
+
+# For each voronoi tile "i" in the city...
+for (u in 1:nrow(cityvor)) {
+  
+  #... we find which raster cells belong to tile "i".
+  #tilerast <- subset(cityrast, city#rast$voronoi == cityvor$voronoi[u])
+  tilerast <- cityrast[cityrast$voronoi == cityvor$voronoi[u],]
+  
+  # And if there are more than 2 tiles...
+  if (nrow(tilerast) > 1) {
+    # ... then calculate distances among its raster cells...
+    distmat <- matrix(sf::st_distance(tilerast), ncol = nrow(tilerast))
+    distmat <- distmat / 1000
+    
+    #... set the diagonal of the distance matrix...
+    diag(distmat) <- 0.052140543316
+    
+    #... calculate the local environment of each cell...
+    myenv1 <- fcalcLocalEnv(
+      data = as.matrix(cbind(tilerast$n_w, tilerast$n_nw)),
+      distmat = distmat,
+      coords = sf::st_coordinates(tilerast),
+      s = s
+    )
+     myenv2 <- fcalcLocalEnv(
+      data = as.matrix(cbind(tilerast$n_hw, tilerast$n_nonhw)),
+      distmat = distmat,
+      coords = sf::st_coordinates(tilerast),
+      s = s
+    )
+    
+    #use the seg package to calculate segregation measures. 
+    
+    #isp<-seg::isp(
+     #x=myenv@coords[,1:2],
+    #data=myenv@data[,1:2],
+    #nb=distmat
+  #)
+    
+    proxmat <- exp(-distmat*s)
+    
+    #le<-seg::localenv(
+      #x=myenv@coords,
+      #data=myenv@data,
+      #power=s,
+      #scale=FALSE
+    #)
+    
+    spatseg1<-seg::spatseg(
+    env=myenv1
+    )
+    spatseg2<-seg::spatseg(
+    env=myenv2
+    )
+    
+    #dissim<-seg::dissim(
+      #data=myenv@data,
+      #nb=distmat
+    #)
+    
+
+    # use your own segregtion functions and functions of oasisR
+    
+    #... calculate the I...
+    #density corrected based on proportions
+    I1 <- fMoranIdens (
+      x = myenv1@data[,1] / rowSums(myenv1@data),
+      weight = proxmat, ## The diagonal in distmat is ~51 meters
+      dens = rowSums(myenv1@data) / sum(myenv1@data), 
+      N = sum(myenv1@data)
+      )
+     
+    I2 <- fMoranIdens (
+      x = myenv2@data[,1] / rowSums(myenv2@data),
+      weight = proxmat, ## The diagonal in distmat is ~51 meters
+      dens = rowSums(myenv2@data) / sum(myenv2@data), 
+      N = sum(myenv2@data)
+      )
+     #I <- fMoranI (
+      # x = myenv@data[,1],
+       #y = myenv@data[,2],
+       #weight = proxmat, ## The diagonal in distmat is ~51 meters
+    #   scaled = FALSE,
+    #   rowstandardize = TRUE
+    # )
+    # 
+    
+    #... and, finally, save the I estimate to our data.frame "vor":
+    cityvor$moranI1[u] <- I1$globalI
+    cityvor$moranI2[u] <- I2$globalI
+    #cityvor$isp[u]<-isp
+   #cityvor$le[u]<-le@data
+   #cityvor$dis[u]<-dissim$d
+   cityvor$spatseg1[u]<-spatseg1@d
+   cityvor$spatseg2[u]<-spatseg2@d
+  }
+  
+}
+```
+
+
+```{r}
+city_positions<-pollstations %>% 
+filter(gmcode=="GM0855")
+```
+
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = cityvor$spatseg1
+)
+palette2 <- leaflet::colorNumeric(
+  palette = "Oranges", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = city_positions$PV1
+)
+leaflet::leaflet(cityvor) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addPolygons(
+    label = ~spatseg1,
+    color = ~palette(spatseg1),
+    opacity = 0.7
+  ) |>
+  leaflet::addCircleMarkers(
+  data=city_positions,
+  fillColor=~palette2(city_positions$PV1),
+  fillOpacity=1,
+  radius =8,
+  label= ~PV1) %>%
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~spatseg1,
+    title = "Segregation (NW-D)"
+  ) |>
+leaflet::addLegend(
+    "topleft",
+    pal = palette2, 
+    values = city_positions$PV1,
+    title = "PV environment-immigration"
+  )
+```
+
+
+```{r}
+#pollstations_tilburg <- sf::st_intersection(x = city_positions, y = cityvor, sf::sf_use_s2(FALSE))
+#fsave(pollstations_tilburg, "polltil_data.RData")
+load("./data/processed/20220714polltil_data.RData")
+pollstations_tilburg<- x
+```
+
+
+```{r}
+
+pollstations_tilburg2<-st_set_geometry(pollstations_tilburg,NULL)
+
+pollstations_tilburg2 %>%
+    dplyr::select(Pvar1,Pvar2, PER1,PER2, PV1,PV2,moranI1,moranI1,spatseg1,spatseg2) %>% 
+    as.data.frame() %>%
+    cor(use = "pairwise.complete.obs")
+```
+```{r}
+votes <- cbind(city_positions$PLUS50,city_positions$CDA,city_positions$CU,city_positions$D66,city_positions$DENK,city_positions$FvD,city_positions$GL,city_positions$PvdA,city_positions$PvdD,city_positions$PVV,city_positions$SGP,city_positions$SP,city_positions$VVD)
+  
+
+row<-rowSums(votes)          
+shares <- votes/row
+
+positions_df<-positions_df %>% 
+  na.omit()
+
+plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing = TRUE)[1])
+
+ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
+    ylab("environmental protection <---------> sustainability")
+
+plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing = FALSE)[1])
+
+ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
+    ylab("environmental protection <---------> sustainability")
+```
+
+```{r}
+palette <- leaflet::colorNumeric(
+  palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = cityvor$spatseg2
+)
+palette2 <- leaflet::colorNumeric(
+  palette = "Oranges", # or other RColorBrewer palettes e.g "Greens", "magma"
+  domain = city_positions$PVar2
+)
+leaflet::leaflet(cityvor) |>
+  leaflet::addTiles() |>
+  leaflet::addProviderTiles(providers$Stamen.Toner) |>
+  leaflet::addPolygons(
+    label = ~spatseg1,
+    color = ~palette(spatseg2),
+    opacity = 0.7
+  ) |>
+  leaflet::addCircleMarkers(
+  data=city_positions,
+  fillColor=~palette2(city_positions$Pvar2),
+  fillOpacity=1,
+  radius =8,
+  label= ~Pvar2) %>%
+  leaflet::addLegend(
+    "topleft",
+    pal = palette, 
+    values = ~spatseg2,
+    title = "Segregation (Rented homed)"
+  ) |>
+leaflet::addLegend(
+    "topleft",
+    pal = palette2, 
+    values = city_positions$Pvar2,
+    title = "PVar economy-redistribution"
+  )
+```

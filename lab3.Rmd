@@ -8,7 +8,7 @@ output:
     toc:  true
     toc_float: true
     number_sections: false
- 
+    
 ---
 
 ```{r, globalsettings, echo=FALSE, warning=FALSE, results='hide'}
@@ -165,7 +165,7 @@ amsterdam_train <- opq ("Amsterdam, The Netherlands") %>% #geolocating train sta
 amsterdam_train_polygons<-amsterdam_train$osm_polygons 
 ```
 
-```{r}
+```{r,eval=FALSE}
 trainbuffer <-st_buffer(amsterdam_train_polygons,500) #creating buffers(500m)
 unibuffer <-st_buffer(amsterdam_uni_polygons,500)
 supermarketbuffer <-st_buffer(amsterdam_supermarket_points,500) 
@@ -173,13 +173,13 @@ worshipbuffer <-st_buffer(amsterdam_worship_polygons,500)
 
 ```
 
-```{r}
+```{r,eval=FALSE}
 suspicious_sf <- sf::st_as_sf(x = suspicious, coords = c("long", "lat"), crs =st_crs(amsterdam_train_polygons)) #matching projection
 amsterdam_polling_stations<-suspicious_sf %>%  #filtering suspicious pollig stations Amsterdam
   filter(gmcode=="GM0363")
 ```
 
-```{r}
+```{r,eval=FALSE}
 leaflet(data = amsterdam_polling_stations) %>%
   leaflet::addTiles() %>% 
   leaflet::addProviderTiles(providers$Stamen.Toner) %>% 
@@ -218,13 +218,13 @@ leaflet(data = amsterdam_polling_stations) %>%
     options = leaflet::layersControlOptions(collapsed = FALSE))
 ```
 
-```{r}
+```{r,eval=FALSE}
 close_polling_stations <- st_intersection(trainbuffer,amsterdam_polling_stations) #finding polling stations inside the buffer areas around train stations
 close_polling_stations_train<-close_polling_stations %>% 
 distinct(Adres,.keep_all = TRUE)
 ```
 
-```{r}
+```{r,eval=FALSE}
 distances<-st_distance(amsterdam_polling_stations,amsterdam_train_polygons) #distance matrix
 distances.df<-as.data.frame(distances)
 colnames(distances.df) <- amsterdam_train_polygons$osm_id
