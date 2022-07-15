@@ -10,6 +10,7 @@ output:
     number_sections: false
    
 ---
+# Functions and loading, preparing the data
 
 Cleaning up the local environment
 ```{r}
@@ -235,6 +236,7 @@ positions_df<- x
 ```
 
 Calculating polarization based on party positions. Here i am using the Chapel Hill Election Survey, which is based on expert ratings. I calculated the median of the experts' ratings based on the literature recommendation.I examine the positions twice on two axes, with relevant political issues selected on the basis of opinion polls. I have placed the parties once along the axes of (y)environmental protection and (x)immigration policy and a second time along the axes of (y)redistributive policy and (x)state intervention in the economy.
+
 ```{r}
 js_df <- ungroup(pollstations)
 
@@ -305,6 +307,7 @@ pollstations<- x
 # Nijmegen
 
 Selecting the rasters in Nijmegen
+
 ```{r}
 city <- "Nijmegen"
 cityrast_id <- which(rast$GM_NAAM == city)  # will come handy later ;)
@@ -312,6 +315,7 @@ cityrast <- rast[cityrast_id, ]
 ```
 
 Preparing variables for the segregation analyses. I will analyse two types of segregation: ethnic (non-western immigrants vs western immigrant+Dutch) and housing (rented housing vs  homes occupied by their owner). 
+
 ```{r}
 cityrast$pnw <- cityrast$percentage_niet_westerse_migr_achtergr
 cityrast$phw <- cityrast$percentage_huurwoningen
@@ -335,6 +339,7 @@ plot(cityrast$n_hw, cityrast$n_nonhw)
 ```
 
 Calculate the spatial matrix (in kilometres). Convert the diagonal to 0.0521 (the average distance between two points in a 100x100 metre area) 
+
 ```{r}
 distmat <- matrix(sf::st_distance(cityrast), ncol = nrow(cityrast))
 distmat <- distmat/1000
@@ -343,7 +348,11 @@ s <- 2
 proxmat <- exp(-distmat * s)
 ```
 
+
+## % Non-western immigrants
+
 Let's examine the ethnic pattern!
+
 ```{r}
 palette <- leaflet::colorNumeric(
   palette = "viridis",
@@ -368,6 +377,7 @@ leaflet::leaflet(cityrast) |>
 ```
 
 To measure segregation, it will be necessary to define the local environment. This function calculates it.
+
 ```{r}
 fcalcLocalEnv <- function( # "data" is a 2-columns matrix
   data, coords, distmat, s, proj4string = sp::CRS("+proj=longlat +datum=WGS84")
@@ -451,6 +461,7 @@ Selecting voronoids in Nijmegen
 cityvor <- voronoi[voronoi$voronoi %in% rast$voronoi[cityrast_id], ]
 ```
 
+## For loop to measure segregation in every tile
 
 Calculating segregation scores of the voronoids
 ```{r}
@@ -562,6 +573,9 @@ city_positions<-pollstations %>%
 filter(gmcode=="GM0268")
 ```
 
+
+## Mapping segregation (ethnic) and polarisation (environment-immigration)
+
 Analyse the relationship between political polarisation and segregation
 ```{r}
 palette <- leaflet::colorNumeric(
@@ -608,6 +622,9 @@ load("./data/processed/20220714pollnij_data.RData")
 pollstations_nijmegen<- x
 ```
 
+
+## Correlation results
+
 Correlations
 ```{r}
 
@@ -618,7 +635,10 @@ pollstations_nijmegen2 %>%
     as.data.frame() %>%
     cor(use = "pairwise.complete.obs")
 ```
+
 Visualise polarized and nonpolarised polling stations (environment-immigration, nonwestern-western and dutch)
+
+
 ```{r}
 votes <- cbind(city_positions$PLUS50,city_positions$CDA,city_positions$CU,city_positions$D66,city_positions$DENK,city_positions$FvD,city_positions$GL,city_positions$PvdA,city_positions$PvdD,city_positions$PVV,city_positions$SGP,city_positions$SP,city_positions$VVD)
   
@@ -639,7 +659,11 @@ plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing =
 ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
     ylab("environmental protection <---------> sustainability")
 ```
-Visualise polarized and nonpolarised polling stations (redistribution-economy intervention, rented homes-homes occupied by the owners)
+
+## Mapping segregation (residential) and polarisation (economy)
+
+Analyse the relationship between political polarisation and segregation
+
 ```{r}
 palette <- leaflet::colorNumeric(
   palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
@@ -716,6 +740,8 @@ diag(distmat) <- 0.052140543316
 s <- 2
 proxmat <- exp(-distmat * s)
 ```
+
+## % Non-western immigrants
 
 ```{r}
 palette <- leaflet::colorNumeric(
@@ -797,6 +823,8 @@ I$globalI
 ```{r}
 cityvor <- voronoi[voronoi$voronoi %in% rast$voronoi[cityrast_id], ]
 ```
+
+## For loop to measure segregation in every tile
 
 ```{r}
 # slope of the distance decay function:
@@ -907,6 +935,8 @@ city_positions<-pollstations %>%
 filter(gmcode=="GM0855")
 ```
 
+## Mapping segregation (ethnic) and polarisation (environment-immigration)
+
 ```{r}
 palette <- leaflet::colorNumeric(
   palette = "viridis", # or other RColorBrewer palettes e.g "Greens", "magma"
@@ -982,6 +1012,8 @@ plotexample <- which(city_positions$PV1 == sort(city_positions$PV1, decreasing =
 ggplot(positions_df, aes(x=immigrate_policy_median, y=environment_median)) + geom_image(aes(image = image),size = shares[plotexample,]) + xlim(0, 10) + ylim(0, 10) + theme(aspect.ratio = 1)+ xlab("permissive imm. pol. <---------> strict imm. pol") +
     ylab("environmental protection <---------> sustainability")
 ```
+
+## Mapping segregation (residential) and polarisation (economy)
 
 ```{r}
 palette <- leaflet::colorNumeric(
