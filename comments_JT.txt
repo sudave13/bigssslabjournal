@@ -1,0 +1,20 @@
+Hi David, 
+
+thnx for this script. 
+
+One request. For readability, could you please include the argument names of functions and try to add comments in your script. 
+
+Thus not: 
+
+amsterdam_uni <- opq ("Amsterdam, The Netherlands")
+
+but
+
+amsterdam_uni <- opq (getbb("Amsterdam, The Netherlands")) #getting the bounding box of the city of Amsterdam and make it an overpass query object 
+
+It is also nice to include a brief description of new packages. 
+
+
+Thus 
+
+osmdata: package to retrieve open street map data. See: https://docs.ropensci.org/osmdata/
